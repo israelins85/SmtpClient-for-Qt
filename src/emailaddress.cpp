@@ -26,6 +26,16 @@ EmailAddress::EmailAddress(const QString & address, const QString & name)
     this->name = name;
 }
 
+EmailAddress::EmailAddress()
+{
+}
+
+EmailAddress::EmailAddress(const EmailAddress &other)
+{
+    this->address = other.address;
+    this->name = other.name;
+}
+
 EmailAddress::~EmailAddress()
 {
 }
@@ -46,12 +56,12 @@ void EmailAddress::setAddress(const QString & address)
     this->address = address;
 }
 
-const QString & EmailAddress::getName() const
+QString EmailAddress::getName() const
 {
     return name;
 }
 
-const QString & EmailAddress::getAddress() const
+QString EmailAddress::getAddress() const
 {
     return address;
 }

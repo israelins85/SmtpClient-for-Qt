@@ -102,7 +102,7 @@ void SmtpClient::setPort(int port)
 /**
  * @brief Returns the host name of the server.
  */
-const QString& SmtpClient::getHost() const
+QString SmtpClient::getHost() const
 {
     return this->host;
 }
@@ -110,7 +110,7 @@ const QString& SmtpClient::getHost() const
 /**
  * @brief Returns the username used for authenticating.
  */
-const QString& SmtpClient::getUser() const
+QString SmtpClient::getUser() const
 {
     return this->user;
 }
@@ -118,7 +118,7 @@ const QString& SmtpClient::getUser() const
 /**
  * @brief Returns the password used for authenticating.
  */
-const QString& SmtpClient::getPassword() const
+QString SmtpClient::getPassword() const
 {
     return this->password;
 }
@@ -150,7 +150,7 @@ SmtpClient::ConnectionType SmtpClient::getConnectionType() const
 /**
  * @brief Returns the client's name.
  */
-const QString& SmtpClient::getName() const
+QString SmtpClient::getName() const
 {
     return this->name;
 }
@@ -166,7 +166,7 @@ void SmtpClient::setName(const QString &name)
 /**
  * @brief Returns the last response of the server.
  */
-const QString & SmtpClient::getResponseText() const
+QString SmtpClient::getResponseText() const
 {
     return responseText;
 }
@@ -250,8 +250,8 @@ bool SmtpClient::waitForReadyConnected(int msec) {
     if (isReadyConnected)
         return true;
 
-    loop.exec();
     QTimer::singleShot(msec, &loop, SLOT(quit()));
+    loop.exec();
 
     return isReadyConnected;
 }
@@ -266,8 +266,8 @@ bool SmtpClient::waitForAuthenticated(int msec) {
     if (isAuthenticated)
         return true;
 
-    loop.exec();
     QTimer::singleShot(msec, &loop, SLOT(quit()));
+    loop.exec();
 
     return isAuthenticated;
 }
@@ -282,8 +282,8 @@ bool SmtpClient::waitForMailSent(int msec) {
     if (isMailSent)
         return true;
 
-    loop.exec();
     QTimer::singleShot(msec, &loop, SLOT(quit()));
+    loop.exec();
 
     return isMailSent;
 }
@@ -430,25 +430,25 @@ void SmtpClient::changeState(SmtpClient::ClientState state) {
         switch (rcptType)
         {
         case _TO:
-            addressList = &email->getRecipients(MimeMessage::To);
+            addressList = email->getRecipients(MimeMessage::To);
             break;
         case _CC:
-            addressList = &email->getRecipients(MimeMessage::Cc);
+            addressList = email->getRecipients(MimeMessage::Cc);
             break;
         case _BCC:
-            addressList = &email->getRecipients(MimeMessage::Bcc);
+            addressList = email->getRecipients(MimeMessage::Bcc);
             break;
         default:
             changeState(_MAIL_3_DATA);
             return;
         }
-        addressIt = addressList->constBegin();
+        addressIt = addressList.constBegin();
         changeState(_MAIL_2_RCPT);
         break;
 
     case _MAIL_2_RCPT:
-        if (addressIt != addressList->end()) {
-            sendMessage("RCPT TO: <" + (*addressIt)->getAddress() + ">");
+        if (addressIt != addressList.constEnd()) {
+            sendMessage("RCPT TO: <" + (*addressIt).getAddress() + ">");
             addressIt++;
         } else {
             changeState(_MAIL_1_RCPT_INIT);

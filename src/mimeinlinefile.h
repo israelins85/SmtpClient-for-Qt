@@ -29,6 +29,7 @@ public:
     /* [1] Constructors and Destructors */
 
     MimeInlineFile(QFile *f);
+    MimeInlineFile(QIODevice *d, const QString &name);
     ~MimeInlineFile();
 
     /* [1] --- */

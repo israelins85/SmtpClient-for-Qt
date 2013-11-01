@@ -102,7 +102,7 @@ public:
 
     /* [1] Constructors and Destructors */
 
-    SmtpClient(const QString & host = "locahost", int port = 25, ConnectionType ct = TcpConnection);
+    SmtpClient(const QString & host = "localhost", int port = 25, ConnectionType ct = TcpConnection);
 
     ~SmtpClient();
 
@@ -111,27 +111,27 @@ public:
 
     /* [2] Getters and Setters */
 
-    const QString& getHost() const;
+    QString getHost() const;
     void setHost(QString &host);
 
     int getPort() const;
     void setPort(int port);
 
-    const QString& getName() const;
+    QString getName() const;
     void setName(const QString &name);
 
     ConnectionType getConnectionType() const;
 
-    const QString & getUser() const;
+    QString getUser() const;
     void setUser(const QString &host);
 
-    const QString & getPassword() const;
+    QString getPassword() const;
     void setPassword(const QString &password);
 
     SmtpClient::AuthMethod getAuthMethod() const;
     void setAuthMethod(AuthMethod method);
 
-    const QString & getResponseText() const;
+    QString getResponseText() const;
     int getResponseCode() const;
 
     QTcpSocket* getSocket();
@@ -184,8 +184,8 @@ protected:
     bool isMailSent;
 
     MimeMessage *email;
-    QList<EmailAddress*>::const_iterator addressIt;
-    const QList<EmailAddress*> *addressList;
+    QList<EmailAddress>::const_iterator addressIt;
+    QList<EmailAddress> addressList;
 
     int rcptType;
     enum _RcptType { _TO = 1, _CC = 2, _BCC = 3};

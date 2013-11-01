@@ -29,9 +29,18 @@ MimeFile::MimeFile(QFile *file)
     this->cEncoding = Base64;
 }
 
+MimeFile::MimeFile(QIODevice *d, const QString &name)
+{
+    this->file = d;
+    this->cType = "application/octet-stream";
+    this->cName = name;
+    this->cEncoding = Base64;
+}
+
 MimeFile::~MimeFile()
 {
-    delete file;
+    if(file)
+        delete file;
 }
 
 /* [1] --- */

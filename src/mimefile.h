@@ -19,6 +19,8 @@
 #ifndef MIMEFILE_H
 #define MIMEFILE_H
 
+#include <QPointer>
+
 #include "mimepart.h"
 #include "smtpmime_global.h"
 
@@ -31,6 +33,7 @@ public:
     /* [1] Constructors and Destructors */
 
     MimeFile(QFile *f);
+    MimeFile(QIODevice *d, const QString &name);
     ~MimeFile();
 
     /* [1] --- */
@@ -44,7 +47,7 @@ protected:
 
     /* [3] Protected members */
 
-    QFile* file;
+    QPointer<QIODevice> file;
 
     /* [3] --- */
 

@@ -23,7 +23,13 @@
 MimeInlineFile::MimeInlineFile(QFile *f)
     : MimeFile(f)
 {
-    this->headerLines += "Content-Disposition: inline\r\n";
+    addHeaderLine("Content-Disposition: inline");
+}
+
+MimeInlineFile::MimeInlineFile(QIODevice *d, const QString &name)
+    : MimeFile(d, name)
+{
+    addHeaderLine("Content-Disposition: inline");
 }
 
 MimeInlineFile::~MimeInlineFile()

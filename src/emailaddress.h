@@ -29,7 +29,8 @@ public:
     /* [1] Constructors and Destructors */
 
     EmailAddress();
-    EmailAddress(const QString & address, const QString & name="");
+    EmailAddress(const EmailAddress &other);
+    EmailAddress(const QString & address, const QString & name = "");
 
     ~EmailAddress();
 
@@ -40,8 +41,8 @@ public:
     void setName(const QString & name);
     void setAddress(const QString & address);
 
-    const QString & getName() const;
-    const QString & getAddress() const;
+    QString getName() const;
+    QString getAddress() const;
 
     /* [2] --- */
 

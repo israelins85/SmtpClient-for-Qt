@@ -31,6 +31,7 @@ public:
     /* [1] Constructors and Destructors */
 
     MimeAttachment(QFile* file);
+    MimeAttachment(QIODevice *d, const QString &name);
     ~MimeAttachment();
 
     /* [1] --- */
