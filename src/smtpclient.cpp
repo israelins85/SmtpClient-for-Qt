@@ -330,7 +330,7 @@ void SmtpClient::setConnectionType(ConnectionType ct)
 void SmtpClient::changeState(SmtpClient::ClientState state) {
     this->state = state;
 
-#ifdef QT_NO_DEBUG
+#ifndef QT_DEBUG
     // Emit stateChanged signal only for non-internal states
     if (state <= DisconnectingState) {
         emit stateChanged(state);
@@ -478,7 +478,7 @@ void SmtpClient::changeState(SmtpClient::ClientState state) {
     case _MAIL_4_SEND_DATA:
         email->writeToDevice(*socket);
 
-#ifndef QT_NO_DEBUG
+#ifdef QT_DEBUG
         qDebug() << "[Socket] OUT:";
         qDebug() << email->toString();
 #endif
@@ -613,7 +613,7 @@ void SmtpClient::processResponse() {
 void SmtpClient::sendMessage(const QString &text)
 {
 
-#ifndef QT_NO_DEBUG
+#ifdef QT_DEBUG
     qDebug() << "[Socket] OUT:" << text;
 #endif
 
@@ -633,7 +633,7 @@ void SmtpClient::emitError(SmtpClient::SmtpError e)
 
 void SmtpClient::socketStateChanged(QAbstractSocket::SocketState state) {
 
-#ifndef QT_NO_DEBUG
+#ifdef QT_DEBUG
     qDebug() << "[Socket] State:" << state;
 #endif
 
@@ -652,7 +652,7 @@ void SmtpClient::socketStateChanged(QAbstractSocket::SocketState state) {
 }
 
 void SmtpClient::socketError(QAbstractSocket::SocketError socketError) {
-#ifndef QT_NO_DEBUG
+#ifdef QT_DEBUG
     qDebug() << "[Socket] ERROR:" << socketError;
 #endif
     QString errorText = staticMetaObject.enumerator(staticMetaObject.indexOfEnumerator("SocketError")).valueToKey(socketError);
@@ -668,7 +668,7 @@ void SmtpClient::socketReadyRead()
         responseLine = socket->readLine();
         tempResponse += responseLine;
 
-#ifndef QT_NO_DEBUG
+#ifdef QT_DEBUG
         qDebug() << "[Socket] IN: " << responseLine;
 #endif
     }
