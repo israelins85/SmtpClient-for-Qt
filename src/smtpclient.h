@@ -172,9 +172,6 @@ protected:
     AuthMethod authMethod;
     bool clearUserDataAfterLogin;
 
-    int connectionTimeout;
-    int responseTimeout;
-
     QString responseText;
     QString tempResponse;
     int responseCode;
@@ -198,6 +195,7 @@ protected:
     void changeState(ClientState state);
     void processResponse();
     void sendMessage(const QString &text);
+    void emitError(SmtpClient::SmtpError e);
 
     /* [5] --- */
 
@@ -210,6 +208,10 @@ protected slots:
     void socketReadyRead();
     void socketEncrypted();
 
+    void connectionTimeout();
+    void authenticationTimeout();
+    void mailSendTimeout();
+
     /* [6] --- */
 
 
@@ -217,7 +219,7 @@ signals:
 
     /* [7] Signals */
 
-    void error(SmtpClient::SmtpError e);
+    void error(SmtpClient::SmtpError e, QString errorText = "");
     void stateChanged(SmtpClient::ClientState s);
     void connected();
     void readyConnected();
