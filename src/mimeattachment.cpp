@@ -24,13 +24,13 @@
 MimeAttachment::MimeAttachment(QFile *file)
     : MimeFile(file)
 {
-    addHeaderLine("Content-disposition: attachment");
+    addHeaderLine("Content-Disposition: attachment");
 }
 
 MimeAttachment::MimeAttachment(QIODevice *d, const QString &name)
     : MimeFile(d, name)
 {
-    addHeaderLine("Content-disposition: attachment");
+    addHeaderLine("Content-Disposition: attachment");
 }
 
 MimeAttachment::~MimeAttachment()
