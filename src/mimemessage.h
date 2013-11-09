@@ -19,7 +19,7 @@
 #ifndef MIMEMESSAGE_H
 #define MIMEMESSAGE_H
 
-#include <QList>
+#include <QStringList>
 #include <QTextStream>
 
 #include "smtpmime_global.h"
@@ -52,6 +52,7 @@ public:
     void addTo(const EmailAddress &rcpt);
     void addCc(const EmailAddress &rcpt);
     void addBcc(const EmailAddress &rcpt);
+    void addCustomHeader(const QString &hdr);
     void setSubject(const QString &subject);
     void addPart(MimePart* part);
 
@@ -60,6 +61,7 @@ public:
     EmailAddress getSender() const;
     const QList<EmailAddress> &getRecipients(RecipientType type = To) const;
     QString getSubject() const;
+    const QStringList &getCustomHeaders() const;
     const QList<MimePart*> & getParts() const;
 
     MimePart& getContent();
@@ -81,6 +83,7 @@ protected:
     EmailAddress sender;
     QList<EmailAddress> recipientsTo, recipientsCc, recipientsBcc;
     QString subject;
+    QStringList customHeaders;
     MimePart *content;
 
     MimePart::Encoding hEncoding;

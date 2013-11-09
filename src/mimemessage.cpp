@@ -82,6 +82,11 @@ void MimeMessage::addBcc(const EmailAddress &rcpt) {
     this->recipientsBcc << rcpt;
 }
 
+void MimeMessage::addCustomHeader(const QString &hdr)
+{
+    this->customHeaders << hdr;
+}
+
 void MimeMessage::setSubject(const QString & subject)
 {
     this->subject = subject;
@@ -121,6 +126,11 @@ const QList<EmailAddress> &MimeMessage::getRecipients(RecipientType type) const
 QString MimeMessage::getSubject() const
 {
     return subject;
+}
+
+const QStringList &MimeMessage::getCustomHeaders() const
+{
+    return customHeaders;
 }
 
 const QList<MimePart*> & MimeMessage::getParts() const
@@ -210,9 +220,14 @@ void MimeMessage::writeToDevice(QIODevice &out) {
     /* ------------ Subject ------------- */
     header.append("Subject: ");
     header.append(format(subject, hEncoding));
+    header.append("\r\n");
     /* ---------------------------------- */
 
-    header.append("\r\n");
+    foreach (QString hdr, customHeaders) {
+        header.append(hdr.toLocal8Bit());
+        header.append("\r\n");
+    }
+
     header.append("MIME-Version: 1.0\r\n");
 
     out.write(header);
