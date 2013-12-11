@@ -142,9 +142,12 @@ public:
     /* [3] Public methods */
 
     bool connectToHost();
+    bool isConnected();
+
     bool login();
-    bool login(const QString &user, const QString &password,
-               AuthMethod method = AuthLogin);
+    bool login(const QString &user, const QString &password, AuthMethod method = AuthLogin);
+    bool isLogged();
+
     bool sendMail(MimeMessage& email);
     void quit();
 

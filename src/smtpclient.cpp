@@ -200,6 +200,11 @@ bool SmtpClient::connectToHost()
     return true;
 }
 
+bool SmtpClient::isConnected()
+{
+    return state != UnconnectedState;
+}
+
 bool SmtpClient::login()
 {
     if (!isReadyConnected || isAuthenticated)
@@ -216,6 +221,11 @@ bool SmtpClient::login(const QString &user, const QString &password, AuthMethod 
     this->authMethod = method;
     clearUserDataAfterLogin = true;
     return login();
+}
+
+bool SmtpClient::isLogged()
+{
+    return isAuthenticated;
 }
 
 bool SmtpClient::sendMail(MimeMessage& email)
