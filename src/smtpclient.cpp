@@ -32,7 +32,8 @@ SmtpClient::SmtpClient(const QString & host, int port, ConnectionType connection
     authMethod(AuthPlain),
     isReadyConnected(false),
     isAuthenticated(false),
-    isMailSent(false)
+    isMailSent(false),
+    isReset(false)
 {
     setConnectionType(connectionType);
 
@@ -247,6 +248,17 @@ void SmtpClient::quit()
     changeState(DisconnectingState);
 }
 
+bool SmtpClient::reset()
+{
+    if (!isReadyConnected)
+        return false;
+
+    isReset = false;
+
+    changeState(ResetState);
+
+    return true;
+}
 
 bool SmtpClient::waitForReadyConnected(int msec) {
     if (state == UnconnectedState)
@@ -255,17 +267,7 @@ bool SmtpClient::waitForReadyConnected(int msec) {
     if (isReadyConnected)
         return true;
 
-    QEventLoop loop;
-    QObject::connect(this, SIGNAL(readyConnected()), &loop, SLOT(quit()));
-    QObject::connect(this, SIGNAL(error(SmtpClient::SmtpError)), &loop, SLOT(quit()));
-
-    QTimer timer;
-    timer.setSingleShot(true);
-    connect(&timer, SIGNAL(timeout()), SLOT(connectionTimeout()));
-    connect(&timer, SIGNAL(timeout()), &loop, SLOT(quit()));
-    timer.start(msec);
-
-    loop.exec();
+    waitForEvent(msec, SIGNAL(readyConnected()), SLOT(connectionTimeout()));
 
     return isReadyConnected;
 }
@@ -277,17 +279,7 @@ bool SmtpClient::waitForAuthenticated(int msec) {
     if (isAuthenticated)
         return true;
 
-    QEventLoop loop;
-    QObject::connect(this, SIGNAL(authenticated()), &loop, SLOT(quit()));
-    QObject::connect(this, SIGNAL(error(SmtpClient::SmtpError)), &loop, SLOT(quit()));
-
-    QTimer timer;
-    timer.setSingleShot(true);
-    connect(&timer, SIGNAL(timeout()), SLOT(authenticationTimeout()));
-    connect(&timer, SIGNAL(timeout()), &loop, SLOT(quit()));
-    timer.start(msec);
-
-    loop.exec();
+    waitForEvent(msec, SIGNAL(authenticated()), SLOT(authenticationTimeout()));
 
     return isAuthenticated;
 }
@@ -299,19 +291,22 @@ bool SmtpClient::waitForMailSent(int msec) {
     if (isMailSent)
         return true;
 
-    QEventLoop loop;
-    QObject::connect(this, SIGNAL(mailSent()), &loop, SLOT(quit()));
-    QObject::connect(this, SIGNAL(error(SmtpClient::SmtpError)), &loop, SLOT(quit()));
-
-    QTimer timer;
-    timer.setSingleShot(true);
-    connect(&timer, SIGNAL(timeout()), SLOT(mailSendTimeout()));
-    connect(&timer, SIGNAL(timeout()), &loop, SLOT(quit()));
-    timer.start(msec);
-
-    loop.exec();
+    waitForEvent(msec, SIGNAL(mailSent()), SLOT(mailSendTimeout()));
 
     return isMailSent;
+}
+
+bool SmtpClient::waitForReset(int msec)
+{
+    if (!isReadyConnected)
+        return false;
+
+    if (isReset)
+        return true;
+
+    waitForEvent(msec, SIGNAL(mailReset()), SLOT(mailSendTimeout()));
+
+    return isReset;
 }
 
 /* [3] --- */
@@ -381,8 +376,12 @@ void SmtpClient::changeState(SmtpClient::ClientState state) {
         socket->disconnectFromHost();
         break;
 
+    case ResetState:
+        sendMessage("RSET");
+        break;
+
     case _EHLO_State:
-        // Service ready. Send EHLO message and chage the state
+        // Service ready. Send EHLO message and change the state
         sendMessage("EHLO " + name);
         break;
 
@@ -519,6 +518,15 @@ void SmtpClient::processResponse() {
         changeState(_EHLO_State);
         break;
 
+    case ResetState:
+        if (responseCode != 250) {
+            emitError(ServerError);
+            return;
+        }
+        emit mailReset();
+        changeState(ReadyState);
+        break;
+
     case _EHLO_State:
         // The response code needs to be 250.
         if (responseCode != 250) {
@@ -634,6 +642,24 @@ void SmtpClient::sendMessage(const QString &text)
 void SmtpClient::emitError(SmtpClient::SmtpError e)
 {
     emit error(e, QString("Last server response: %1").arg(responseText));
+}
+
+void SmtpClient::waitForEvent(int msec, const char *successSignal, const char *timeoutSlot)
+{
+    QEventLoop loop;
+    QObject::connect(this, successSignal, &loop, SLOT(quit()));
+    QObject::connect(this, SIGNAL(error(SmtpClient::SmtpError)), &loop, SLOT(quit()));
+
+    QTimer timer;
+    if(msec > 0)
+    {
+        timer.setSingleShot(true);
+        connect(&timer, SIGNAL(timeout()), timeoutSlot);
+        connect(&timer, SIGNAL(timeout()), &loop, SLOT(quit()));
+        timer.start(msec);
+    }
+
+    loop.exec();
 }
 
 /* [4] --- */

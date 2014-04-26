@@ -66,6 +66,7 @@ public:
         AuthenticatingState = 4,
         MailSendingState = 5,
         DisconnectingState = 6,
+        ResetState = 7,
 
         /* Internal States */
         _EHLO_State = 50,
@@ -150,10 +151,12 @@ public:
 
     bool sendMail(MimeMessage& email);
     void quit();
+    bool reset();
 
     bool waitForReadyConnected(int msec = 30000);
     bool waitForAuthenticated(int msec = 30000);
     bool waitForMailSent(int msec = 30000);
+    bool waitForReset(int msec = 30000);
 
     /* [3] --- */
 
@@ -182,6 +185,7 @@ protected:
     bool isReadyConnected;
     bool isAuthenticated;
     bool isMailSent;
+    bool isReset;
 
     MimeMessage *email;
     QList<EmailAddress>::const_iterator addressIt;
@@ -199,6 +203,7 @@ protected:
     void processResponse();
     void sendMessage(const QString &text);
     void emitError(SmtpClient::SmtpError e);
+    void waitForEvent(int msec, const char *successSignal, const char *timeoutSlot);
 
     /* [5] --- */
 
@@ -228,6 +233,7 @@ signals:
     void readyConnected();
     void authenticated();
     void mailSent();
+    void mailReset();
     void disconnected();
 
     /* [7] --- */
