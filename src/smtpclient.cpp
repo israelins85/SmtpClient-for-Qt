@@ -33,7 +33,8 @@ SmtpClient::SmtpClient(const QString & host, int port, ConnectionType connection
     isReadyConnected(false),
     isAuthenticated(false),
     isMailSent(false),
-    isReset(false)
+    isReset(false),
+    verifyPeer(true)
 {
     setConnectionType(connectionType);
 
@@ -77,6 +78,14 @@ void SmtpClient::setPassword(const QString &password)
 void SmtpClient::setAuthMethod(AuthMethod method)
 {
     this->authMethod = method;
+}
+
+/**
+ * @brief Sets if certificate verification is required.
+ */
+void SmtpClient::setVerifyPeer(const bool verify)
+{
+    this->verifyPeer = verify;
 }
 
 /**
@@ -128,6 +137,14 @@ QString SmtpClient::getPassword() const
 SmtpClient::AuthMethod SmtpClient::getAuthMethod() const
 {
     return this->authMethod;
+}
+
+/**
+ * @brief Returns True if certificate validity verification is set.
+ */
+bool SmtpClient::getVerifyPeer() const
+{
+    return this->verifyPeer;
 }
 
 /**
@@ -326,6 +343,7 @@ void SmtpClient::setConnectionType(ConnectionType ct)
     case SslConnection:
     case TlsConnection:
         socket = new QSslSocket(this);
+        ((QSslSocket*)socket)->setPeerVerifyMode(verifyPeer ? QSslSocket::QueryPeer : QSslSocket::VerifyPeer);
         connect(socket, SIGNAL(encrypted()),
                 this, SLOT(socketEncrypted()));
         break;

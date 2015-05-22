@@ -132,6 +132,9 @@ public:
     SmtpClient::AuthMethod getAuthMethod() const;
     void setAuthMethod(AuthMethod method);
 
+    bool getVerifyPeer() const;
+    void setVerifyPeer(const bool verify);
+
     QString getResponseText() const;
     int getResponseCode() const;
 
@@ -177,6 +180,7 @@ protected:
     QString password;
     AuthMethod authMethod;
     bool clearUserDataAfterLogin;
+    bool verifyPeer;
 
     QString responseText;
     QString tempResponse;
