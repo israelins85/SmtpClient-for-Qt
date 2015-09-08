@@ -19,14 +19,15 @@
 #ifndef MIMEMESSAGE_H
 #define MIMEMESSAGE_H
 
+#include <QStringList>
+#include <QTextStream>
+
+#include "smtpmime_global.h"
 #include "mimepart.h"
 #include "mimemultipart.h"
 #include "emailaddress.h"
-#include <QList>
 
-#include "smtpexports.h"
-
-class SMTP_EXPORT MimeMessage : public QObject
+class SMTP_MIME_EXPORT MimeMessage : public QObject
 {
 public:
 
@@ -38,7 +39,7 @@ public:
 
     /* [1] Constructors and Destructors */
 
-    MimeMessage(bool createAutoMimeConent = true);
+    MimeMessage(bool createAutoMimeContent = true);
     ~MimeMessage();
 
     /* [1] --- */
@@ -46,19 +47,21 @@ public:
 
     /* [2] Getters and Setters */
 
-    void setSender(EmailAddress* e);
-    void addRecipient(EmailAddress* rcpt, RecipientType type = To);
-    void addTo(EmailAddress* rcpt);
-    void addCc(EmailAddress* rcpt);
-    void addBcc(EmailAddress* rcpt);
-    void setSubject(const QString & subject);
+    void setSender(const EmailAddress &sndr);
+    void addRecipient(const EmailAddress &rcpt, RecipientType type = To);
+    void addTo(const EmailAddress &rcpt);
+    void addCc(const EmailAddress &rcpt);
+    void addBcc(const EmailAddress &rcpt);
+    void addCustomHeader(const QString &hdr);
+    void setSubject(const QString &subject);
     void addPart(MimePart* part);
 
     void setHeaderEncoding(MimePart::Encoding);
 
-    const EmailAddress & getSender() const;
-    const QList<EmailAddress*> & getRecipients(RecipientType type = To) const;
-    const QString & getSubject() const;
+    EmailAddress getSender() const;
+    const QList<EmailAddress> &getRecipients(RecipientType type = To) const;
+    QString getSubject() const;
+    const QStringList &getCustomHeaders() const;
     const QList<MimePart*> & getParts() const;
 
     MimePart& getContent();
@@ -69,6 +72,7 @@ public:
     /* [3] Public methods */
 
     virtual QString toString();
+    void writeToDevice(QIODevice &device);
 
     /* [3] --- */
 
@@ -76,13 +80,17 @@ protected:
 
     /* [4] Protected members */
 
-    EmailAddress* sender;
-    QList<EmailAddress*> recipientsTo, recipientsCc, recipientsBcc;
+    EmailAddress sender;
+    QList<EmailAddress> recipientsTo, recipientsCc, recipientsBcc;
     QString subject;
+    QStringList customHeaders;
     MimePart *content;
     bool autoMimeContentCreated;
     
     MimePart::Encoding hEncoding;
+
+    static QByteArray format(const QString &text, MimePart::Encoding encoding);
+    static QByteArray formatAddress(const EmailAddress &address, MimePart::Encoding encoding);
 
     /* [4] --- */
 

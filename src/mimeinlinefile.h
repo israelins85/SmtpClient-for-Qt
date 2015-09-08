@@ -19,17 +19,17 @@
 #ifndef MIMEINLINEFILE_H
 #define MIMEINLINEFILE_H
 
+#include "smtpmime_global.h"
 #include "mimefile.h"
 
-#include "smtpexports.h"
-
-class SMTP_EXPORT MimeInlineFile : public MimeFile
+class SMTP_MIME_EXPORT MimeInlineFile : public MimeFile
 {
 public:
 
     /* [1] Constructors and Destructors */
 
     MimeInlineFile(QFile *f);
+    MimeInlineFile(QIODevice *d, const QString &name);
     ~MimeInlineFile();
 
     /* [1] --- */
@@ -47,8 +47,6 @@ protected:
 
 
     /* [4] Protected methods */
-
-    virtual void prepare();
 
     /* [4] --- */
 };

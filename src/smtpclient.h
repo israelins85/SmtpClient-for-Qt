@@ -21,13 +21,15 @@
 
 #include <QObject>
 #include <QtNetwork/QSslSocket>
-
+#include <QEventLoop>
+#include "smtpmime_global.h"
 #include "mimemessage.h"
-#include "smtpexports.h"
 
-class SMTP_EXPORT SmtpClient : public QObject
+
+class SMTP_MIME_EXPORT SmtpClient : public QObject
 {
     Q_OBJECT
+    Q_ENUMS (AuthMethod SmtpError ConnectionType ClientState)
 public:
 
     /* [0] Enumerations */
@@ -40,19 +42,60 @@ public:
 
     enum SmtpError
     {
-        ConnectionTimeoutError,
-        ResponseTimeoutError,
-        SendDataTimeoutError,
-        AuthenticationFailedError,
-        ServerError,    // 4xx smtp error
-        ClientError     // 5xx smtp error
+        ConnectionTimeoutError = 0,
+        ResponseTimeoutError = 1,
+        AuthenticationError = 2,
+        MailSendingError = 3,
+        ServerError = 4,    // 4xx smtp error
+        ClientError = 5,    // 5xx smtp error
+        SocketError = 6
     };
 
     enum ConnectionType
     {
-        TcpConnection,
-        SslConnection,
-        TlsConnection       // STARTTLS
+        TcpConnection = 0,
+        SslConnection = 1,
+        TlsConnection = 2      // STARTTLS
+    };
+
+    enum ClientState {
+        UnconnectedState = 0,
+        ConnectingState = 1,
+        ConnectedState = 2,
+        ReadyState = 3,
+        AuthenticatingState = 4,
+        MailSendingState = 5,
+        DisconnectingState = 6,
+        ResetState = 7,
+
+        /* Internal States */
+        _EHLO_State = 50,
+        _TLS_State = 51,
+
+        _READY_Connected = 52,
+        _READY_Authenticated = 53,
+        _READY_MailSent = 54,
+        _READY_Encrypted = 55,
+
+        /* Internal Substates */
+
+        // TLS
+        _TLS_0_STARTTLS = 60,
+        _TLS_1_ENCRYPT = 61,
+        _TLS_2_EHLO = 62,
+
+        // AUTH
+        _AUTH_PLAIN_0 = 70,
+        _AUTH_LOGIN_0 = 71,
+        _AUTH_LOGIN_1_USER = 72,
+        _AUTH_LOGIN_2_PASS = 73,
+
+        // MAIL
+        _MAIL_0_FROM = 81,
+        _MAIL_1_RCPT_INIT = 82,
+        _MAIL_2_RCPT = 83,
+        _MAIL_3_DATA = 84,
+        _MAIL_4_SEND_DATA = 85
     };
 
     /* [0] --- */
@@ -60,7 +103,7 @@ public:
 
     /* [1] Constructors and Destructors */
 
-    SmtpClient(const QString & host = "locahost", int port = 25, ConnectionType ct = TcpConnection);
+    SmtpClient(const QString & host = "localhost", int port = 25, ConnectionType ct = TcpConnection);
 
     ~SmtpClient();
 
@@ -69,41 +112,33 @@ public:
 
     /* [2] Getters and Setters */
 
-    const QString& getHost() const;
-    void setHost(const QString &host);
+    QString getHost() const;
+    void setHost(QString &host);
 
     int getPort() const;
     void setPort(int port);
 
-    const QString& getName() const;
+    QString getName() const;
     void setName(const QString &name);
 
     ConnectionType getConnectionType() const;
-    void setConnectionType(ConnectionType ct);
 
-    const QString & getUser() const;
-    void setUser(const QString &user);
+    QString getUser() const;
+    void setUser(const QString &host);
 
-    const QString & getPassword() const;
+    QString getPassword() const;
     void setPassword(const QString &password);
 
     SmtpClient::AuthMethod getAuthMethod() const;
     void setAuthMethod(AuthMethod method);
 
-    const QString & getResponseText() const;
+    bool getVerifyPeer() const;
+    void setVerifyPeer(const bool verify);
+
+    QString getResponseText() const;
     int getResponseCode() const;
 
-    int getConnectionTimeout() const;
-    void setConnectionTimeout(int msec);
-
-    int getResponseTimeout() const;
-    void setResponseTimeout(int msec);
-    
-    int getSendMessageTimeout() const;
-    void setSendMessageTimeout(int msec);
-
     QTcpSocket* getSocket();
-
 
     /* [2] --- */
 
@@ -111,14 +146,20 @@ public:
     /* [3] Public methods */
 
     bool connectToHost();
+    bool isConnected();
 
     bool login();
     bool login(const QString &user, const QString &password, AuthMethod method = AuthLogin);
+    bool isLogged();
 
     bool sendMail(MimeMessage& email);
-
     void quit();
+    bool reset();
 
+    bool waitForReadyConnected(int msec = 30000);
+    bool waitForAuthenticated(int msec = 30000);
+    bool waitForMailSent(int msec = 30000);
+    bool waitForReset(int msec = 30000);
 
     /* [3] --- */
 
@@ -127,6 +168,8 @@ protected:
     /* [4] Protected members */
 
     QTcpSocket *socket;
+    ClientState state;
+    bool syncMode;
 
     QString host;
     int port;
@@ -136,27 +179,35 @@ protected:
     QString user;
     QString password;
     AuthMethod authMethod;
+    bool clearUserDataAfterLogin;
+    bool verifyPeer;
 
-    int connectionTimeout;
-    int responseTimeout;
-    int sendMessageTimeout;
-    
-    
     QString responseText;
+    QString tempResponse;
     int responseCode;
 
+    bool isReadyConnected;
+    bool isAuthenticated;
+    bool isMailSent;
+    bool isReset;
 
-    class ResponseTimeoutException {};
-    class SendMessageTimeoutException {};
+    MimeMessage *email;
+    QList<EmailAddress>::const_iterator addressIt;
+    QList<EmailAddress> addressList;
+
+    int rcptType;
+    enum _RcptType { _TO = 1, _CC = 2, _BCC = 3};
 
     /* [4] --- */
 
 
     /* [5] Protected methods */
-
-    void waitForResponse() throw (ResponseTimeoutException);
-
-    void sendMessage(const QString &text) throw (SendMessageTimeoutException);
+    void setConnectionType(ConnectionType ct);
+    void changeState(ClientState state);
+    void processResponse();
+    void sendMessage(const QString &text);
+    void emitError(SmtpClient::SmtpError e);
+    void waitForEvent(int msec, const char *successSignal, const char *timeoutSlot);
 
     /* [5] --- */
 
@@ -167,6 +218,11 @@ protected slots:
     void socketStateChanged(QAbstractSocket::SocketState state);
     void socketError(QAbstractSocket::SocketError error);
     void socketReadyRead();
+    void socketEncrypted();
+
+    void connectionTimeout();
+    void authenticationTimeout();
+    void mailSendTimeout();
 
     /* [6] --- */
 
@@ -175,7 +231,14 @@ signals:
 
     /* [7] Signals */
 
-    void smtpError(SmtpClient::SmtpError e);
+    void error(SmtpClient::SmtpError e, QString errorText = "");
+    void stateChanged(SmtpClient::ClientState s);
+    void connected();
+    void readyConnected();
+    void authenticated();
+    void mailSent();
+    void mailReset();
+    void disconnected();
 
     /* [7] --- */
 

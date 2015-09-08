@@ -17,6 +17,7 @@
 */
 
 #include "mimemultipart.h"
+#include <QIODevice>
 #include <QTime>
 #include <QCryptographicHash>
 
@@ -42,7 +43,9 @@ MimeMultiPart::MimeMultiPart(MultiPartType type)
 }
 
 MimeMultiPart::~MimeMultiPart() {
-
+    foreach (MimePart *part, parts) {
+        delete part;
+    }
 }
 
 void MimeMultiPart::addPart(MimePart *part) {
@@ -53,20 +56,21 @@ const QList<MimePart*> & MimeMultiPart::getParts() const {
     return parts;
 }
 
-void MimeMultiPart::prepare() {
+void MimeMultiPart::writeContent(QIODevice &device) {
     QList<MimePart*>::iterator it;
 
-    content = "";
     for (it = parts.begin(); it != parts.end(); it++) {
-        content += "--" + cBoundary + "\r\n";
-        (*it)->prepare();
-        content += (*it)->toString();
+        device.write("--" );
+        device.write(cBoundary.toLatin1());
+        device.write("\r\n");
+        (*it)->writeToDevice(device);
     };
 
-    content += "--" + cBoundary + "--\r\n";
-
-    MimePart::prepare();
+    device.write("--");
+    device.write(cBoundary.toLatin1());
+    device.write("--\r\n");
 }
+
 
 void MimeMultiPart::setMimeType(const MultiPartType type) {
     this->type = type;
