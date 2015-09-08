@@ -22,13 +22,15 @@
 #include <QObject>
 #include <QByteArray>
 
-class QuotedPrintable : public QObject
+#include "smtpexports.h"
+
+class SMTP_EXPORT QuotedPrintable : public QObject
 {
     Q_OBJECT
 public:
 
-    static QString& encode(const QByteArray &input);
-    static QByteArray& decode(const QString &input);
+    static QString encode(const QByteArray &input);
+    static QByteArray decode(const QString &input);
 
 private:
     QuotedPrintable();
