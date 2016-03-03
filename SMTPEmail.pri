@@ -20,7 +20,7 @@ SOURCES += \
     $$PWD/src/smtpclient.cpp \
     $$PWD/src/quotedprintable.cpp \
     $$PWD/src/mimemultipart.cpp \
-    $$PWD/src/mimecontentformatter.cpp \
+    $$PWD/src/mimecontentformatter.cpp
 
 HEADERS  += \
     $$PWD/src/emailaddress.h \
@@ -32,7 +32,6 @@ HEADERS  += \
     $$PWD/src/mimepart.h \
     $$PWD/src/mimetext.h \
     $$PWD/src/smtpclient.h \
-    $$PWD/src/SmtpMime \
     $$PWD/src/quotedprintable.h \
     $$PWD/src/mimemultipart.h \
     $$PWD/src/mimecontentformatter.h \
