@@ -458,8 +458,18 @@ void SmtpClient::waitForResponse()
 
 void SmtpClient::sendMessage(const QString &text)
 {
-    qDebug() << "SEND: " << text;
-    socket->write(text.toUtf8() + "\r\n");
+    sendMessage(text.toUtf8());
+}
+
+void SmtpClient::sendMessage(const char* text)
+{
+    sendMessage(QByteArray(text));
+}
+
+void SmtpClient::sendMessage(const QByteArray& data)
+{
+    qDebug() << "SEND: " << data;
+    socket->write(data + "\r\n");
     if (! socket->waitForBytesWritten(sendMessageTimeout))
     {
       emit smtpError(SendDataTimeoutError);

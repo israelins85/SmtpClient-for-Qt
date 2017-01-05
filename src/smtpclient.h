@@ -157,6 +157,8 @@ protected:
     void waitForResponse();
 
     void sendMessage(const QString &text);
+    void sendMessage(const char* text);
+    void sendMessage(const QByteArray &text);
 
     /* [5] --- */
 
