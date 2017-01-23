@@ -32,8 +32,8 @@ const QString MULTI_PART_NAMES[] = {
 
 MimeMultiPart::MimeMultiPart(MultiPartType type)
 {
-    this->type = type;
-    this->cType = MULTI_PART_NAMES[this->type];
+    this->multiPartType = type;
+    this->cType = MULTI_PART_NAMES[this->multiPartType];
     this->cEncoding = _8Bit;
 
     QCryptographicHash md5(QCryptographicHash::Md5);
@@ -69,10 +69,10 @@ void MimeMultiPart::prepare() {
 }
 
 void MimeMultiPart::setMimeType(const MultiPartType type) {
-    this->type = type;
+    this->multiPartType = type;
     this->cType = MULTI_PART_NAMES[type];
 }
 
 MimeMultiPart::MultiPartType MimeMultiPart::getMimeType() const {
-    return type;
+    return multiPartType;
 }

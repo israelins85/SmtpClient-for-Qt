@@ -42,15 +42,16 @@ public:
     /* [0] --- */
 
     /* [1] Constructors and Destructors */
-    MimeMultiPart(const MultiPartType type = Related);
+    MimeMultiPart(const MultiPartType multiPartType = Related);
 
     ~MimeMultiPart();
 
     /* [1] --- */
+    Type type() { return Type::MimeMultiPart; }
 
     /* [2] Getters and Setters */
 
-    void setMimeType(const MultiPartType type);
+    void setMimeType(const MultiPartType multiPartType);
     MultiPartType getMimeType() const;
 
     const QList<MimePart*> & getParts() const;
@@ -68,7 +69,7 @@ public:
 protected:
     QList< MimePart* > parts;
 
-    MultiPartType type;
+    MultiPartType multiPartType;
     
 };
 

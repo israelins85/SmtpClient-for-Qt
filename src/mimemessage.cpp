@@ -98,7 +98,7 @@ void MimeMessage::setSubject(const QString & subject)
 
 void MimeMessage::addPart(MimePart *part)
 {
-    if (typeid(*content) == typeid(MimeMultiPart)) {
+    if (content->type() == MimePart::Type::MimeMultiPart) {
         ((MimeMultiPart*) content)->addPart(part);
     };
 }
@@ -134,10 +134,9 @@ const QString & MimeMessage::getSubject() const
 
 const QList<MimePart*> & MimeMessage::getParts() const
 {
-    if (typeid(*content) == typeid(MimeMultiPart)) {
+    if (content->type() == MimePart::Type::MimeMultiPart) {
         return ((MimeMultiPart*) content)->getParts();
-    }
-    else {
+    } else {
         QList<MimePart*> *res = new QList<MimePart*>();
         res->append(content);
         return *res;
