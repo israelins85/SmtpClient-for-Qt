@@ -100,7 +100,7 @@ void MimeMessage::addPart(MimePart *part)
 {
     if (content->type() == MimePart::Type::MimeMultiPart) {
         ((MimeMultiPart*) content)->addPart(part);
-    };
+    }
 }
 
 void MimeMessage::setHeaderEncoding(MimePart::Encoding hEnc)
