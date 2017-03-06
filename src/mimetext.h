@@ -33,7 +33,7 @@ public:
     ~MimeText();
 
     /* [1] --- */
-    Type type() { return Type::MimeText; }
+    virtual Type type() { return Type::MimeText; }
 
 
     /* [2] Getters and Setters*/

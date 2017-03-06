@@ -47,7 +47,7 @@ public:
     ~MimeMultiPart();
 
     /* [1] --- */
-    Type type() { return Type::MimeMultiPart; }
+    virtual Type type() { return Type::MimeMultiPart; }
 
     /* [2] Getters and Setters */
 

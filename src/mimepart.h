@@ -48,7 +48,7 @@ public:
 
     /* [1] --- */
     enum class Type { MimePart, MimeText, MimeMultiPart };
-    Type type() { return Type::MimePart; }
+    virtual Type type() { return Type::MimePart; }
 
     /* [2] Getters and Setters */
 
