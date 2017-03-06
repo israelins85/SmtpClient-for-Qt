@@ -18,6 +18,7 @@
 
 #include "mimefile.h"
 #include <QFileInfo>
+#include <QMimeDatabase>
 
 /* [1] Constructors and Destructors */
 
@@ -62,6 +63,12 @@ void MimeFile::prepare()
     this->content = file->readAll();
     file->close();
   }
+
+    QMimeDatabase l_mmDatabase;
+    QMimeType l_mmType = l_mmDatabase.mimeTypeForFileNameAndData(cName, content);
+    if (l_mmType.isValid())
+        cType = l_mmType.name();
+
     /* !!! IMPORTANT !!!! */
     MimePart::prepare();
 }
