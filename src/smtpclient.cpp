@@ -20,6 +20,10 @@
 
 #include <QFileInfo>
 #include <QByteArray>
+#include <QEventLoop>
+#include <QTimer>
+
+Q_LOGGING_CATEGORY(smtpClient, "SmtpClient")
 
 
 /* [1] Constructors and destructors */
@@ -248,7 +252,7 @@ bool SmtpClient::connectToHost()
             ((QSslSocket*) socket)->startClientEncryption();
 
             if (!((QSslSocket*) socket)->waitForEncrypted(connectionTimeout)) {
-                qDebug() << ((QSslSocket*) socket)->errorString();
+                qCDebug(smtpClient) << ((QSslSocket*) socket)->errorString();
                 emit smtpError(ConnectionTimeoutError);
                 return false;
             }
@@ -464,7 +468,8 @@ void SmtpClient::waitForResponse()
         while (socket->canReadLine()) {
             // Save the server's response
             responseText = socket->readLine();
-            qDebug() << "RECV: " << responseText;
+            if (responseText.endsWith("\r\n")) responseText.chop(2);
+            qCDebug(smtpClient) << "RECV: " << responseText;
 
             // Extract the respose code from the server's responce (first 3 digits)
             responseCode = responseText.left(3).toInt();
@@ -492,7 +497,11 @@ void SmtpClient::sendMessage(const char* text)
 
 void SmtpClient::sendMessage(const QByteArray& data)
 {
-    qDebug() << "SEND: " << data;
+    if (data.size() > 1024)
+        qCDebug(smtpClient) << "SEND: " << (data.left(1024 - 3) + "...");
+    else
+        qCDebug(smtpClient) << "SEND: " << data;
+
     socket->write(data + "\r\n");
     if (! socket->waitForBytesWritten(sendMessageTimeout))
     {

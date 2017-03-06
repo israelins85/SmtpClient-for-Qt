@@ -21,9 +21,12 @@
 
 #include <QObject>
 #include <QtNetwork/QSslSocket>
+#include <QLoggingCategory>
 
 #include "mimemessage.h"
 #include "smtpexports.h"
+
+Q_DECLARE_LOGGING_CATEGORY(smtpClient)
 
 class SMTP_EXPORT SmtpClient : public QObject
 {
