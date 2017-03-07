@@ -18,45 +18,33 @@
 
 #include "mimetext.h"
 
-/* [1] Constructors and Destructors */
-
 MimeText::MimeText(const QString &txt)
 {
-    this->text = txt;
-    this->cType = "text/plain";
-    this->cCharset = "utf-8";
-    this->cEncoding = _8Bit;
+    setContentType("text/plain");
+    setCharset("utf-8");
+    setEncoding(_8Bit);
+    setText(txt);
 }
 
 MimeText::~MimeText() { }
 
-/* [1] --- */
-
-
-/* [2] Getters and Setters */
-
 void MimeText::setText(const QString & text)
 {
-    this->text = text;
+    m_text = text;
+    m_textUtf8 = m_text.toUtf8();
 }
 
-const QString & MimeText::getText() const
+const QString& MimeText::text() const
 {
-    return text;
+    return m_text;
 }
 
-/* [2] --- */
-
-
-/* [3] Protected Methods */
-
-void MimeText::prepare()
+qint64 MimeText::contentSize() const
 {
-    this->content.clear();
-    this->content.append(text);
-
-    /* !!! IMPORTANT !!! */
-    MimePart::prepare();
+    return m_textUtf8.size();
 }
 
-/* [3] --- */
+QByteArray MimeText::readContent(qint64 a_offset, qint64 bytes2Read) const
+{
+    return m_textUtf8.mid(a_offset, bytes2Read);
+}

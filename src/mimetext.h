@@ -26,38 +26,20 @@
 class SMTP_EXPORT MimeText : public MimePart
 {
 public:
-
-    /* [1] Constructors and Destructors */
-
     MimeText(const QString &text = "");
     ~MimeText();
 
-    /* [1] --- */
     virtual Type type() { return Type::MimeText; }
 
-
-    /* [2] Getters and Setters*/
-
     void setText(const QString & text);
+    const QString & text() const;
 
-    const QString & getText() const;
-
-    /* [2] --- */
+    qint64 contentSize() const;
+    QByteArray readContent(qint64 a_offset, qint64 bytes2Read) const;
 
 protected:
-
-    /* [3] Protected members */
-
-    QString text;
-    /* [3] --- */
-
-
-    /* [4] Protected methods */
-
-    void prepare();
-
-    /* [4] --- */
-
+    QString m_text;
+    QByteArray m_textUtf8;
 };
 
 #endif // MIMETEXT_H

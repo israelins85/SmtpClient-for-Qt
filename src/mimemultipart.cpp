@@ -19,6 +19,7 @@
 #include "mimemultipart.h"
 #include <QTime>
 #include <QCryptographicHash>
+#include <QIODevice>
 
 const QString MULTI_PART_NAMES[] = {
     "multipart/mixed",         //    Mixed
@@ -32,47 +33,41 @@ const QString MULTI_PART_NAMES[] = {
 
 MimeMultiPart::MimeMultiPart(MultiPartType type)
 {
-    this->multiPartType = type;
-    this->cType = MULTI_PART_NAMES[this->multiPartType];
-    this->cEncoding = _8Bit;
+    m_multiPartType = type;
+    setContentType(MULTI_PART_NAMES[m_multiPartType]);
+    setEncoding(_8Bit);
 
-    QCryptographicHash md5(QCryptographicHash::Md5);
+    QCryptographicHash md5(QCryptographicHash::Sha1);
     md5.addData(QByteArray().append(qrand()));
-    cBoundary = md5.result().toHex();
+    setContentBoundary(md5.result().toHex());
 }
 
-MimeMultiPart::~MimeMultiPart() {
-
-}
+MimeMultiPart::~MimeMultiPart() {}
 
 void MimeMultiPart::addPart(MimePart *part) {
-    parts.append(part);
+    m_parts.append(part);
 }
 
 const QList<MimePart*> & MimeMultiPart::getParts() const {
-    return parts;
+    return m_parts;
 }
 
-void MimeMultiPart::prepare() {
-    QList<MimePart*>::iterator it;
+void MimeMultiPart::write(QIODevice* device) const
+{
+    QByteArray l_contentBoundary = "--" + contentBoundary() + "\r\n";
 
-    content = "";
-    for (it = parts.begin(); it != parts.end(); it++) {
-        content += "--" + cBoundary + "\r\n";
-        (*it)->prepare();
-        content += (*it)->toString();
-    };
-
-    content += "--" + cBoundary + "--\r\n";
-
-    MimePart::prepare();
+    for (MimePart* l_mp : m_parts) {
+        device->write(l_contentBoundary);
+        l_mp->write(device);
+    }
+    device->write(l_contentBoundary);
 }
 
-void MimeMultiPart::setMimeType(const MultiPartType type) {
-    this->multiPartType = type;
-    this->cType = MULTI_PART_NAMES[type];
+void MimeMultiPart::setMultPartType(const MultiPartType type) {
+    m_multiPartType = type;
+    setContentType(MULTI_PART_NAMES[type]);
 }
 
-MimeMultiPart::MultiPartType MimeMultiPart::getMimeType() const {
-    return multiPartType;
+MimeMultiPart::MultiPartType MimeMultiPart::multPartType() const {
+    return m_multiPartType;
 }

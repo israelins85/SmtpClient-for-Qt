@@ -408,7 +408,8 @@ bool SmtpClient::sendMail(MimeMessage& email)
 
         if (responseCode != 354) return false;
 
-        sendMessage(email.toString());
+        email.write(socket);
+        sendMessage("");
 
         // Send \r\n.\r\n to end the mail data
         sendMessage(".");

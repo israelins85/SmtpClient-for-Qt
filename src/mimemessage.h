@@ -26,6 +26,7 @@
 
 #include "smtpexports.h"
 
+class QIODevice;
 class SMTP_EXPORT MimeMessage : public QObject
 {
 public:
@@ -36,15 +37,8 @@ public:
         Bcc                 // blind carbon copy
     };
 
-    /* [1] Constructors and Destructors */
-
     MimeMessage(bool createAutoMimeConent = true);
     ~MimeMessage();
-
-    /* [1] --- */
-
-
-    /* [2] Getters and Setters */
 
     void setSender(EmailAddress* e);
     void addRecipient(EmailAddress* rcpt, RecipientType type = To);
@@ -63,30 +57,16 @@ public:
 
     MimePart& getContent();
     void setContent(MimePart *content);
-    /* [2] --- */
 
-
-    /* [3] Public methods */
-
-    virtual QString toString();
-
-    /* [3] --- */
+    void write(QIODevice* device);
 
 protected:
-
-    /* [4] Protected members */
-
     EmailAddress* sender;
     QList<EmailAddress*> recipientsTo, recipientsCc, recipientsBcc;
     QString subject;
     MimePart *content;
     bool autoMimeContentCreated;
-    
     MimePart::Encoding hEncoding;
-
-    /* [4] --- */
-
-
 };
 
 #endif // MIMEMESSAGE_H

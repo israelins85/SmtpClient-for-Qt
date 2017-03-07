@@ -24,27 +24,11 @@
 MimeAttachment::MimeAttachment(QFile *file)
     : MimeFile(file)
 {
+    setHeader("Content-disposition", "attachment");
 }
-MimeAttachment::MimeAttachment(const QByteArray& stream, const QString& fileName): MimeFile(stream, fileName)
-{
 
-}
+MimeAttachment::MimeAttachment(const QByteArray& stream, const QString& fileName): MimeFile(stream, fileName)
+{}
 
 MimeAttachment::~MimeAttachment()
-{
-}
-
-/* [1] --- */
-
-
-/* [2] Protected methods */
-
-void MimeAttachment::prepare()
-{
-    this->header += "Content-disposition: attachment\r\n";
-
-    /* !!! IMPORTANT !!! */
-    MimeFile::prepare();
-}
-
-/* [2] --- */
+{}

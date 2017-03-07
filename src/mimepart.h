@@ -20,94 +20,72 @@
 #define MIMEPART_H
 
 #include <QObject>
+#include <QMap>
 #include "mimecontentformatter.h"
 
 #include "smtpexports.h"
+
+class QIODevice;
 
 class SMTP_EXPORT MimePart : public QObject
 {
     Q_OBJECT
 public:
-
-    /* [0] Enumerations */
-    enum Encoding {        
+    enum Encoding {
         _7Bit,
         _8Bit,
         Base64,
-        QuotedPrintable
+        QuotedPrintable,
+        Binary
     };
-
-
-    /* [0] --- */
-
-
-    /* [1] Constructors and Destructors */
 
     MimePart();
     ~MimePart();
 
-    /* [1] --- */
-    enum class Type { MimePart, MimeText, MimeMultiPart };
+    enum class Type { MimePart, MimeFile, MimeText, MimeHtml, MimeInlineFile, MimeMultiPart };
     virtual Type type() { return Type::MimePart; }
 
-    /* [2] Getters and Setters */
+    const QMap<QString, QString>& header() const;
 
-    const QString& getHeader() const;
-    const QByteArray& getContent() const;
+    void setHeader(const QMap<QString, QString> & header);
+    void setHeader(const QString& header, const QString& value);
 
-    void setContent(const QByteArray & content);
-    void setHeader(const QString & header);
+    void setContentId(const QString & m_cId);
+    const QString & contentId() const;
 
-    void addHeaderLine(const QString & line);
+    void setContentName(const QString & m_cName);
+    const QString & contentName() const;
 
-    void setContentId(const QString & cId);
-    const QString & getContentId() const;
+    void setContentType(const QString & m_cType);
+    const QString & contentType() const;
 
-    void setContentName(const QString & cName);
-    const QString & getContentName() const;
-
-    void setContentType(const QString & cType);
-    const QString & getContentType() const;
+    void setContentBoundary(const QByteArray & m_cType);
+    const QByteArray & contentBoundary() const;
 
     void setCharset(const QString & charset);
-    const QString & getCharset() const;
+    const QString & charset() const;
 
     void setEncoding(Encoding enc);
-    Encoding getEncoding() const;
+    Encoding encoding() const;
 
-    MimeContentFormatter& getContentFormatter();
+    MimeContentFormatter& contentFormatter();
 
-    /* [2] --- */
+    virtual qint64 contentSize() const = 0;
+    virtual QByteArray readContent(qint64 a_offset = 0, qint64 bytes2Read = -1) const = 0;
 
+    virtual void write(QIODevice* device) const;
 
-    /* [3] Public methods */
+private:
+    QMap<QString, QString> m_header;
 
-    virtual QString toString();
+    QString m_cId;
+    QString m_cName;
+    QString m_cType;
+    QString m_cCharset;
+    QByteArray m_cBoundary;
+    Encoding m_cEncoding;
 
-    virtual void prepare();
-
-    /* [3] --- */
-
-
-
-protected:
-
-    /* [4] Protected members */
-
-    QString header;
-    QByteArray content;
-
-    QString cId;
-    QString cName;
-    QString cType;
-    QString cCharset;
-    QString cBoundary;
-    Encoding cEncoding;
-
-    QString mimeString;
-    bool prepared;
-
-    MimeContentFormatter formatter;
+    MimeContentFormatter m_formatter;
 
     /* [4] --- */
 };

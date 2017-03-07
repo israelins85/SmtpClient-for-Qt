@@ -20,6 +20,7 @@
 
 #include <QDateTime>
 #include "quotedprintable.h"
+#include <QIODevice>
 #include <typeinfo>
 
 /* [1] Constructors and Destructors */
@@ -148,7 +149,7 @@ const QList<MimePart*> & MimeMessage::getParts() const
 
 /* [3] Public Methods */
 
-QString MimeMessage::toString()
+void MimeMessage::write(QIODevice* device)
 {
     QString mime;
 
@@ -250,8 +251,8 @@ QString MimeMessage::toString()
     mime += "MIME-Version: 1.0\r\n";
     mime += QString("Date: %1\r\n").arg(QDateTime::currentDateTime().toString(Qt::RFC2822Date));
 
-    mime += content->toString();
-    return mime;
+    device->write(mime.toUtf8());
+    content->write(device);
 }
 
 /* [3] --- */

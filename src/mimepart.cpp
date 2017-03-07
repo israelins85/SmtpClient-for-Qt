@@ -19,13 +19,12 @@
 #include "mimepart.h"
 #include "quotedprintable.h"
 
-/* [1] Constructors and Destructors */
+#include <QIODevice>
 
 MimePart::MimePart()
 {
-    cEncoding = _7Bit;
-    prepared = false;
-    cBoundary = "";
+    m_cEncoding = _7Bit;
+    m_cBoundary = "";
 }
 
 MimePart::~MimePart()
@@ -33,182 +32,173 @@ MimePart::~MimePart()
     return;
 }
 
-/* [1] --- */
-
-
-/* [2] Getters and Setters */
-
-void MimePart::setContent(const QByteArray & content)
+void MimePart::setHeader(const QMap<QString, QString>& header)
 {
-    this->content = content;
+    m_header = header;
 }
 
-void MimePart::setHeader(const QString & header)
+void MimePart::setHeader(const QString& header, const QString& value)
 {
-    this->header = header;
+    m_header[header] = value;
 }
 
-void MimePart::addHeaderLine(const QString & line)
+const QMap<QString, QString>& MimePart::header() const
 {
-    this->header += line + "\r\n";
-}
-
-const QString& MimePart::getHeader() const
-{
-    return header;
-}
-
-const QByteArray& MimePart::getContent() const
-{
-    return content;
+    return m_header;
 }
 
 void MimePart::setContentId(const QString & cId)
 {
-    this->cId = cId;
+    m_cId = cId;
 }
 
-const QString & MimePart::getContentId() const
+const QString & MimePart::contentId() const
 {
-    return this->cId;
+    return m_cId;
 }
 
 void MimePart::setContentName(const QString & cName)
 {
-    this->cName = cName;
+    m_cName = cName;
 }
 
-const QString & MimePart::getContentName() const
+const QString & MimePart::contentName() const
 {
-    return this->cName;
+    return m_cName;
 }
 
 void MimePart::setContentType(const QString & cType)
 {
-    this->cType = cType;
+    m_cType = cType;
 }
 
-const QString & MimePart::getContentType() const
+const QString & MimePart::contentType() const
 {
-    return this->cType;
+    return m_cType;
+}
+
+void MimePart::setContentBoundary(const QByteArray& a_cBoundary)
+{
+    m_cBoundary = a_cBoundary;
+}
+
+const QByteArray&MimePart::contentBoundary() const
+{
+    return m_cBoundary;
 }
 
 void MimePart::setCharset(const QString & charset)
 {
-    this->cCharset = charset;
+    m_cCharset = charset;
 }
 
-const QString & MimePart::getCharset() const
+const QString & MimePart::charset() const
 {
-    return this->cCharset;
+    return m_cCharset;
 }
 
 void MimePart::setEncoding(Encoding enc)
 {
-    this->cEncoding = enc;
+    m_cEncoding = enc;
 }
 
-MimePart::Encoding MimePart::getEncoding() const
+MimePart::Encoding MimePart::encoding() const
 {
-    return this->cEncoding;
+    return m_cEncoding;
 }
 
-MimeContentFormatter& MimePart::getContentFormatter()
+MimeContentFormatter& MimePart::contentFormatter()
 {
-    return this->formatter;
+    return m_formatter;
 }
 
-/* [2] --- */
-
-
-/* [3] Public methods */
-
-QString MimePart::toString()
+void MimePart::write(QIODevice* device) const
 {
-    if (!prepared)
-        prepare();
-
-    return mimeString;
-}
-
-/* [3] --- */
-
-
-/* [4] Protected methods */
-
-void MimePart::prepare()
-{
-    mimeString = QString();
-
     /* === Header Prepare === */
+    QMap<QString, QString> l_header;
 
     /* Content-Type */
-    mimeString.append("Content-Type: ").append(cType);
+    l_header["Content-Type"] = m_cType;
 
-    if (cName != "")
-        mimeString.append("; name=\"").append(cName).append("\"");
+    if (m_cName != "")
+        l_header["Content-Type"].append("; name=\"").append(m_cName).append("\"");
 
-    if (cCharset != "")
-        mimeString.append("; charset=").append(cCharset);
+    if (m_cCharset != "")
+        l_header["Content-Type"].append("; charset=").append(m_cCharset);
 
-    if (cBoundary != "")
-        mimeString.append("; boundary=").append(cBoundary);
-
-    mimeString.append("\r\n");
+    if (m_cBoundary != "")
+        l_header["Content-Type"].append("; boundary=").append(m_cBoundary);
     /* ------------ */
 
     /* Content-Transfer-Encoding */
-    mimeString.append("Content-Transfer-Encoding: ");
-    switch (cEncoding)
+    switch (m_cEncoding)
     {
     case _7Bit:
-        mimeString.append("7bit\r\n");
+        l_header["Content-Transfer-Encoding"] = "7bit";
         break;
     case _8Bit:
-        mimeString.append("8bit\r\n");
+        l_header["Content-Transfer-Encoding"] = "8bit";
         break;
     case Base64:
-        mimeString.append("base64\r\n");
+        l_header["Content-Transfer-Encoding"] = "base64";
         break;
     case QuotedPrintable:
-        mimeString.append("quoted-printable\r\n");
+        l_header["Content-Transfer-Encoding"] = "quoted-printable";
+        break;
+    case Binary:
+        l_header["Content-Transfer-Encoding"] = "binary";
         break;
     }
     /* ------------------------ */
+    if (m_cEncoding == Binary)
+        l_header["Content-Size"] = QString::number(contentSize());
 
     /* Content-Id */
-    if (cId != NULL)
-        mimeString.append("Content-ID: <").append(cId).append(">\r\n");
+    if (m_cId != NULL)
+        l_header["Content-ID"] = m_cId;
     /* ---------- */
 
     /* Addition header lines */
+    QMap<QString, QString>::ConstIterator l_i = m_header.constBegin(),
+        l_end = m_header.constEnd();
 
-    mimeString.append(header).append("\r\n");
+    for (; l_i != l_end; ++l_i) {
+        l_header[l_i.key()] = l_i.value();
+    }
 
     /* ------------------------- */
 
+    l_i = l_header.constBegin();
+    l_end = l_header.constEnd();
+    for (; l_i != l_end; ++l_i) {
+        device->write(QString("%1: %2\r\n").arg(l_i.key(), l_i.value()).toUtf8());
+    }
     /* === End of Header Prepare === */
 
     /* === Content === */
-    switch (cEncoding)
+    switch (m_cEncoding)
     {
     case _7Bit:
-        mimeString.append(QString(content).toLatin1());
+        device->write(QString(readContent()).toLatin1());
         break;
     case _8Bit:
-        mimeString.append(content);
+        device->write(readContent());
         break;
     case Base64:
-        mimeString.append(formatter.format(content.toBase64()));
+        device->write(m_formatter.format(readContent().toBase64()).toUtf8());
         break;
     case QuotedPrintable:
-        mimeString.append(formatter.format(QuotedPrintable::encode(content), true));
+        device->write(m_formatter.format(QuotedPrintable::encode(readContent()), true).toUtf8());
+        break;
+    case Binary:
+        qint64 l_remainData = contentSize();
+        while (l_remainData > 0) {
+            device->write(readContent(1024));
+        }
         break;
     }
-    mimeString.append("\r\n");
+    device->write("\r\n");
     /* === End of Content === */
-
-    prepared = true;
 }
 
 /* [4] --- */

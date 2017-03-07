@@ -39,38 +39,28 @@ public:
         Encrypted       = 6             // RFC 1847, section 2.2
     };
 
-    /* [0] --- */
-
-    /* [1] Constructors and Destructors */
     MimeMultiPart(const MultiPartType multiPartType = Related);
 
     ~MimeMultiPart();
 
-    /* [1] --- */
     virtual Type type() { return Type::MimeMultiPart; }
 
-    /* [2] Getters and Setters */
-
-    void setMimeType(const MultiPartType multiPartType);
-    MultiPartType getMimeType() const;
+    void setMultPartType(const MultiPartType multiPartType);
+    MultiPartType multPartType() const;
 
     const QList<MimePart*> & getParts() const;
-
-    /* [2] --- */
-
-    /* [3] Public methods */
-
     void addPart(MimePart *part);
 
-    virtual void prepare();
+    virtual void write(QIODevice* device) const;
 
-    /* [3] --- */
+    qint64 contentSize() const { return -1; }
+    QByteArray readContent(qint64 /*a_offset*/, qint64 /*bytes2Read*/) const {
+        return QByteArray();
+    }
 
 protected:
-    QList< MimePart* > parts;
-
-    MultiPartType multiPartType;
-    
+    MultiPartType m_multiPartType;
+    QList< MimePart* > m_parts;
 };
 
 #endif // MIMEMULTIPART_H

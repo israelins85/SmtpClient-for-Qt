@@ -20,58 +20,61 @@
 #include <QFileInfo>
 #include <QMimeDatabase>
 
-/* [1] Constructors and Destructors */
-
 MimeFile::MimeFile(QFile *file)
 {
-    this->file = file;
-    this->cType = "application/octet-stream";
-    this->cName = QFileInfo(*file).fileName();
-    this->cEncoding = Base64;
+    QMimeDatabase l_mmDatabase;
+    QMimeType l_mmType;
+
+    m_file = file;
+    setContentType("application/octet-stream");
+    setContentName(QFileInfo(*file).fileName());
+    m_stream.clear();
+    setEncoding(Binary);
+
+    if (!m_file->isOpen())
+        m_file->open(QFile::ReadOnly);
+
+    l_mmType = l_mmDatabase.mimeTypeForFile(file->fileName());
+    if (l_mmType.isValid())
+        setContentType(l_mmType.name());
 }
 
 MimeFile::MimeFile(const QByteArray& stream, const QString& fileName)
 {
-    this->cEncoding = Base64;
-    this->cType = "application/octet-stream";
-    this->file = 0;
-    this->cName = fileName;
-    this->content = stream;
+    QMimeDatabase l_mmDatabase;
+    QMimeType l_mmType;
+
+    m_file = nullptr;
+    setContentType("application/octet-stream");
+    setContentName(fileName);
+    m_stream = stream;
+    setEncoding(Binary);
+
+    l_mmType = l_mmDatabase.mimeTypeForFileNameAndData(fileName, m_stream);
+    if (l_mmType.isValid())
+        setContentType(l_mmType.name());
 }
 
 MimeFile::~MimeFile()
 {
-  if (file)
-    delete file;
+  if (m_file)
+      delete m_file;
 }
 
-/* [1] --- */
-
-
-/* [2] Getters and setters */
-
-/* [2] --- */
-
-
-/* [3] Protected methods */
-
-void MimeFile::prepare()
+qint64 MimeFile::contentSize() const
 {
-  if (this->file)
-  {
-    file->open(QIODevice::ReadOnly);
-    this->content = file->readAll();
-    file->close();
-  }
-
-    QMimeDatabase l_mmDatabase;
-    QMimeType l_mmType = l_mmDatabase.mimeTypeForFileNameAndData(cName, content);
-    if (l_mmType.isValid())
-        cType = l_mmType.name();
-
-    /* !!! IMPORTANT !!!! */
-    MimePart::prepare();
+    if (m_file)
+        return m_file->size();
+    return m_stream.size();
 }
 
-/* [3] --- */
+QByteArray MimeFile::readContent(qint64 a_offset, qint64 a_bytes2Read) const
+{
+    if (m_file) {
+        if (m_file->pos() != a_offset)
+            m_file->seek(a_offset);
+        return m_file->read(a_bytes2Read);
+    }
 
+    return m_stream.mid(a_offset, a_bytes2Read);
+}
