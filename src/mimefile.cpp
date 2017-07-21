@@ -20,7 +20,7 @@
 #include <QFileInfo>
 #include <QMimeDatabase>
 
-MimeFile::MimeFile(const QString& fileName)
+MimeFile::MimeFile(const QString& fileName, Disposition a_disposition)
 {
     QMimeDatabase l_mmDatabase;
     QMimeType l_mmType;
@@ -38,9 +38,11 @@ MimeFile::MimeFile(const QString& fileName)
     l_mmType = l_mmDatabase.mimeTypeForFile(l_fileInfo);
     if (l_mmType.isValid())
         setContentType(l_mmType.name());
+
+    setDisposition(a_disposition);
 }
 
-MimeFile::MimeFile(const QByteArray& stream, const QString& fileName)
+MimeFile::MimeFile(const QByteArray& stream, const QString& fileName, Disposition a_disposition)
 {
     QMimeDatabase l_mmDatabase;
     QMimeType l_mmType;
@@ -54,12 +56,29 @@ MimeFile::MimeFile(const QByteArray& stream, const QString& fileName)
     l_mmType = l_mmDatabase.mimeTypeForFileNameAndData(fileName, m_stream);
     if (l_mmType.isValid())
         setContentType(l_mmType.name());
+
+    setDisposition(a_disposition);
 }
 
 MimeFile::~MimeFile()
 {
   if (m_file)
       delete m_file;
+}
+
+void MimeFile::setDisposition(MimeFile::Disposition a_disposition)
+{
+    QString l_disposition;
+    switch (a_disposition) {
+        case Disposition::Attachment:
+            l_disposition = "attachment";
+            break;
+        case Disposition::Inline:
+            l_disposition = "inline";
+            break;
+    }
+    if (!l_disposition.isEmpty())
+        setHeader("Content-Disposition", l_disposition);
 }
 
 qint64 MimeFile::contentSize() const

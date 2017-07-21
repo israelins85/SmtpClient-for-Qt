@@ -56,12 +56,12 @@ const QList<MimePart*> & MimeMultiPart::getParts() const {
 
 void MimeMultiPart::write(QIODevice* device) const
 {
-    if (m_parts.isEmpty()) return;
+//    if (m_parts.isEmpty()) return;
 
-    if (m_parts.size() == 1) {
-        m_parts.first()->write(device);
-        return;
-    }
+//    if (m_parts.size() == 1) {
+//        m_parts.first()->write(device);
+//        return;
+//    }
 
     writeHeader(device);
 

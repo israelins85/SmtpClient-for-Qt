@@ -133,19 +133,23 @@ MimeContentFormatter& MimePart::contentFormatter()
 void MimePart::writeHeader(QIODevice* device) const
 {
     /* === Header Prepare === */
-    QMap<QString, QString> l_header;
+    QMap<QString, QString> l_header = m_header;
 
     /* Content-Type */
     l_header["Content-Type"] = m_cType;
 
-    if (m_cName != "")
-        l_header["Content-Type"].append("; name=\"").append(m_cName).append("\"");
+    if (m_cName != "") {
+        l_header["Content-Type"].append(";\n\tname=\"").append(m_cName).append("\"");
+        if (l_header.contains("Content-Disposition")) {
+            l_header["Content-Disposition"].append(";\n\tfilename=").append(m_cName).append("");
+        }
+    }
 
     if (m_cCharset != "")
-        l_header["Content-Type"].append("; charset=").append(m_cCharset);
+        l_header["Content-Type"].append(";\n\tcharset=").append(m_cCharset);
 
     if (m_cBoundary != "")
-        l_header["Content-Type"].append("; boundary=").append(m_cBoundary);
+        l_header["Content-Type"].append(";\n\tboundary=").append(m_cBoundary);
     /* ------------ */
 
     /* Content-Transfer-Encoding */
@@ -176,22 +180,14 @@ void MimePart::writeHeader(QIODevice* device) const
         l_header["Content-ID"] = m_cId;
     /* ---------- */
 
-    /* Addition header lines */
-    QMap<QString, QString>::ConstIterator l_i = m_header.constBegin(),
-        l_end = m_header.constEnd();
+    QMap<QString, QString>::ConstIterator l_i = l_header.constBegin(),
+        l_end = l_header.constEnd();
 
-    for (; l_i != l_end; ++l_i) {
-        l_header[l_i.key()] = l_i.value();
-    }
-
-    /* ------------------------- */
-
-    l_i = l_header.constBegin();
-    l_end = l_header.constEnd();
     for (; l_i != l_end; ++l_i) {
         device->write(QString("%1: %2\r\n").arg(l_i.key(), l_i.value()).toUtf8());
     }
     /* === End of Header Prepare === */
+    device->write("\r\n");
 }
 
 void MimePart::write(QIODevice* device) const
@@ -225,7 +221,7 @@ void MimePart::write(QIODevice* device) const
         }
         break;
     }
-    device->write("\r\n.\r\n");
+    device->write("\r\n");
     /* === End of Content === */
 }
 

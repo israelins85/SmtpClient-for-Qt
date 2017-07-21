@@ -28,9 +28,15 @@ class SMTP_EXPORT MimeFile : public MimePart
 {
     Q_OBJECT
 public:
-    MimeFile(const QByteArray& stream, const QString& fileName);
-    MimeFile(const QString& fileName);
+    enum class Disposition {
+        Attachment, Inline
+    };
+
+    MimeFile(const QByteArray& stream, const QString& fileName, Disposition a_disposition = Disposition::Attachment);
+    MimeFile(const QString& fileName, Disposition a_disposition = Disposition::Attachment);
     ~MimeFile();
+
+    void setDisposition(Disposition a_disposition);
 
     virtual Type type() { return Type::MimeFile; }
 

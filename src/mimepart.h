@@ -42,7 +42,7 @@ public:
     MimePart();
     ~MimePart();
 
-    enum class Type { MimePart, MimeFile, MimeText, MimeHtml, MimeInlineFile, MimeMultiPart };
+    enum class Type { MimePart, MimeMultiPart, MimeFile, MimeText, MimeHtml };
     virtual Type type() { return Type::MimePart; }
 
     const QMap<QString, QString>& header() const;
