@@ -30,10 +30,11 @@ MimeFile::MimeFile(const QString& fileName, Disposition a_disposition)
     setContentType("application/octet-stream");
     setContentName(l_fileInfo.fileName());
     m_stream.clear();
-    setEncoding(Binary);
 
     if (!m_file->isOpen())
         m_file->open(QFile::ReadOnly);
+
+    setEncoding((m_file->size() > 4 * 1024) ? Binary : Base64);
 
     l_mmType = l_mmDatabase.mimeTypeForFile(l_fileInfo);
     if (l_mmType.isValid())
@@ -51,7 +52,7 @@ MimeFile::MimeFile(const QByteArray& stream, const QString& fileName, Dispositio
     setContentType("application/octet-stream");
     setContentName(fileName);
     m_stream = stream;
-    setEncoding(Binary);
+    setEncoding(Base64);
 
     l_mmType = l_mmDatabase.mimeTypeForFileNameAndData(fileName, m_stream);
     if (l_mmType.isValid())
@@ -70,6 +71,8 @@ void MimeFile::setDisposition(MimeFile::Disposition a_disposition)
 {
     QString l_disposition;
     switch (a_disposition) {
+        case Disposition::Undefined:
+            break;
         case Disposition::Attachment:
             l_disposition = "attachment";
             break;

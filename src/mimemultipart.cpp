@@ -56,22 +56,18 @@ const QList<MimePart*> & MimeMultiPart::getParts() const {
 
 void MimeMultiPart::write(QIODevice* device) const
 {
-//    if (m_parts.isEmpty()) return;
-
-//    if (m_parts.size() == 1) {
-//        m_parts.first()->write(device);
-//        return;
-//    }
-
     writeHeader(device);
 
-    QByteArray l_contentBoundary = "--" + contentBoundary() + "\r\n";
+    QByteArray l_contentBoundary = "--" + contentBoundary();
 
     for (MimePart* l_mp : m_parts) {
         device->write(l_contentBoundary);
+        device->write("\r\n");
         l_mp->write(device);
     }
     device->write(l_contentBoundary);
+    device->write("--");
+    device->write("\r\n");
 }
 
 void MimeMultiPart::setMultPartType(const MultiPartType type) {

@@ -29,11 +29,11 @@ class SMTP_EXPORT MimeFile : public MimePart
     Q_OBJECT
 public:
     enum class Disposition {
-        Attachment, Inline
+        Undefined, Attachment, Inline
     };
 
-    MimeFile(const QByteArray& stream, const QString& fileName, Disposition a_disposition = Disposition::Attachment);
-    MimeFile(const QString& fileName, Disposition a_disposition = Disposition::Attachment);
+    MimeFile(const QByteArray& stream, const QString& fileName, Disposition a_disposition = Disposition::Undefined);
+    MimeFile(const QString& fileName, Disposition a_disposition = Disposition::Undefined);
     ~MimeFile();
 
     void setDisposition(Disposition a_disposition);

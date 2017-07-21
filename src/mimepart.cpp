@@ -130,6 +130,10 @@ MimeContentFormatter& MimePart::contentFormatter()
     return m_formatter;
 }
 
+QByteArray MimePart::readContent() const {
+    return readContent(0, contentSize());
+}
+
 void MimePart::writeHeader(QIODevice* device) const
 {
     /* === Header Prepare === */
@@ -139,17 +143,17 @@ void MimePart::writeHeader(QIODevice* device) const
     l_header["Content-Type"] = m_cType;
 
     if (m_cName != "") {
-        l_header["Content-Type"].append(";\n\tname=\"").append(m_cName).append("\"");
+        l_header["Content-Type"].append("; name=\"").append(m_cName).append("\"");
         if (l_header.contains("Content-Disposition")) {
-            l_header["Content-Disposition"].append(";\n\tfilename=").append(m_cName).append("");
+            l_header["Content-Disposition"].append("; filename=").append(m_cName).append("");
         }
     }
 
     if (m_cCharset != "")
-        l_header["Content-Type"].append(";\n\tcharset=").append(m_cCharset);
+        l_header["Content-Type"].append("; charset=").append(m_cCharset);
 
     if (m_cBoundary != "")
-        l_header["Content-Type"].append(";\n\tboundary=").append(m_cBoundary);
+        l_header["Content-Type"].append("; boundary=").append(m_cBoundary);
     /* ------------ */
 
     /* Content-Transfer-Encoding */
@@ -210,11 +214,10 @@ void MimePart::write(QIODevice* device) const
         device->write(m_formatter.format(QuotedPrintable::encode(readContent()), true).toUtf8());
         break;
     case Binary:
-        qint64 l_bytesToRead = 4 * 1024;
         qint64 l_offset = 0;
         qint64 l_total = contentSize();
         while (l_offset < l_total) {
-            QByteArray l_data = readContent(l_offset, l_bytesToRead);
+            QByteArray l_data = readContent(l_offset, 64 * 1024);
             device->write(l_data);
             l_offset += l_data.size();
             qApp->processEvents();

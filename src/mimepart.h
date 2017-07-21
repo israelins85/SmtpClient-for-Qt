@@ -73,7 +73,8 @@ public:
     MimeContentFormatter& contentFormatter();
 
     virtual qint64 contentSize() const = 0;
-    virtual QByteArray readContent(qint64 a_offset = 0, qint64 bytes2Read = -1) const = 0;
+    virtual QByteArray readContent() const;
+    virtual QByteArray readContent(qint64 a_offset, qint64 bytes2Read) const = 0;
 
     virtual void writeHeader(QIODevice* device) const;
     virtual void write(QIODevice* device) const;
