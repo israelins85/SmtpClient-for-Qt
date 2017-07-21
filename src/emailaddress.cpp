@@ -20,6 +20,9 @@
 
 /* [1] Constructors and Destructors */
 
+EmailAddress::EmailAddress()
+{}
+
 EmailAddress::EmailAddress(const QString & address, const QString & name)
 {
     this->address = address;
@@ -54,6 +57,17 @@ const QString & EmailAddress::getName() const
 const QString & EmailAddress::getAddress() const
 {
     return address;
+}
+
+QByteArray EmailAddress::encoded(MimePart::Encoding a_encode) const
+{
+    QByteArray l_encoded;
+    if (!name.isEmpty()) {
+        l_encoded += MimePart::encodeString(name, a_encode);
+    }
+    l_encoded += " <" + address + ">";
+
+    return l_encoded;
 }
 
 /* [2] --- */

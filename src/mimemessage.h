@@ -37,35 +37,33 @@ public:
         Bcc                 // blind carbon copy
     };
 
-    MimeMessage(bool createAutoMimeConent = true);
+    MimeMessage();
     ~MimeMessage();
 
-    void setSender(EmailAddress* e);
-    void addRecipient(EmailAddress* rcpt, RecipientType type = To);
-    void addTo(EmailAddress* rcpt);
-    void addCc(EmailAddress* rcpt);
-    void addBcc(EmailAddress* rcpt);
+    void setSender(const EmailAddress& e);
+    void addRecipient(const EmailAddress& rcpt, RecipientType type = To);
+    void addTo(const EmailAddress& rcpt);
+    void addCc(const EmailAddress& rcpt);
+    void addBcc(const EmailAddress& rcpt);
     void setSubject(const QString & subject);
     void addPart(MimePart* part);
 
     void setHeaderEncoding(MimePart::Encoding);
 
     const EmailAddress & getSender() const;
-    const QList<EmailAddress*> & getRecipients(RecipientType type = To) const;
+    const QList<EmailAddress> & getRecipients(RecipientType type = To) const;
     const QString & getSubject() const;
     const QList<MimePart*> & getParts() const;
 
-    MimePart& getContent();
-    void setContent(MimePart *content);
+    MimeMultiPart& getContent();
 
     void write(QIODevice* device);
 
 protected:
-    EmailAddress* sender;
-    QList<EmailAddress*> recipientsTo, recipientsCc, recipientsBcc;
+    EmailAddress sender;
+    QList<EmailAddress> recipientsTo, recipientsCc, recipientsBcc;
     QString subject;
-    MimePart *content;
-    bool autoMimeContentCreated;
+    MimeMultiPart content;
     MimePart::Encoding hEncoding;
 };
 

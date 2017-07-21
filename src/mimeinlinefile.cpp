@@ -18,8 +18,14 @@
 
 #include "mimeinlinefile.h"
 
-MimeInlineFile::MimeInlineFile(QFile *f)
-    : MimeFile(f)
+MimeInlineFile::MimeInlineFile(const QString& fileName)
+    : MimeFile(fileName)
+{
+    setHeader("Content-Disposition", "inline");
+}
+
+MimeInlineFile::MimeInlineFile(const QByteArray& stream, const QString& fileName)
+    : MimeFile(stream, fileName)
 {
     setHeader("Content-Disposition", "inline");
 }

@@ -19,15 +19,13 @@
 #ifndef EMAILADDRESS_H
 #define EMAILADDRESS_H
 
-#include <QObject>
-
+#include <QString>
 #include "smtpexports.h"
+#include <mimepart.h>
 
-class SMTP_EXPORT EmailAddress : public QObject
+class SMTP_EXPORT EmailAddress
 {
-    Q_OBJECT
 public:
-
     /* [1] Constructors and Destructors */
 
     EmailAddress();
@@ -44,6 +42,8 @@ public:
 
     const QString & getName() const;
     const QString & getAddress() const;
+
+    QByteArray encoded(MimePart::Encoding a_encode) const;
 
     /* [2] --- */
 

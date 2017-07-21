@@ -42,7 +42,9 @@ MimeMultiPart::MimeMultiPart(MultiPartType type)
     setContentBoundary(md5.result().toHex());
 }
 
-MimeMultiPart::~MimeMultiPart() {}
+MimeMultiPart::~MimeMultiPart() {
+    qDeleteAll(m_parts);
+}
 
 void MimeMultiPart::addPart(MimePart *part) {
     m_parts.append(part);
@@ -54,6 +56,15 @@ const QList<MimePart*> & MimeMultiPart::getParts() const {
 
 void MimeMultiPart::write(QIODevice* device) const
 {
+    if (m_parts.isEmpty()) return;
+
+    if (m_parts.size() == 1) {
+        m_parts.first()->write(device);
+        return;
+    }
+
+    writeHeader(device);
+
     QByteArray l_contentBoundary = "--" + contentBoundary() + "\r\n";
 
     for (MimePart* l_mp : m_parts) {

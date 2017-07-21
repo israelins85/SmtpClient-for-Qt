@@ -21,14 +21,16 @@
 
 /* [1] Constructors and Destructors */
 
-MimeAttachment::MimeAttachment(QFile *file)
-    : MimeFile(file)
+MimeAttachment::MimeAttachment(const QString& fileName)
+    : MimeFile(fileName)
 {
     setHeader("Content-disposition", "attachment");
 }
 
 MimeAttachment::MimeAttachment(const QByteArray& stream, const QString& fileName): MimeFile(stream, fileName)
-{}
+{
+    setHeader("Content-disposition", "attachment");
+}
 
 MimeAttachment::~MimeAttachment()
 {}

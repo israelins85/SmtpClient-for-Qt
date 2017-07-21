@@ -29,7 +29,7 @@ class SMTP_EXPORT MimeAttachment : public MimeFile
 {
     Q_OBJECT
 public:
-    MimeAttachment(QFile* file);
+    MimeAttachment(const QString& fileName);
     MimeAttachment(const QByteArray& stream, const QString& fileName);
 
     ~MimeAttachment();

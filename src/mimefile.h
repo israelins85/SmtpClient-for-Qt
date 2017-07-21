@@ -29,7 +29,7 @@ class SMTP_EXPORT MimeFile : public MimePart
     Q_OBJECT
 public:
     MimeFile(const QByteArray& stream, const QString& fileName);
-    MimeFile(QFile *f);
+    MimeFile(const QString& fileName);
     ~MimeFile();
 
     virtual Type type() { return Type::MimeFile; }
@@ -38,7 +38,7 @@ public:
     QByteArray readContent(qint64 a_offset, qint64 a_bytes2Read) const;
 
 private:
-    QFile* m_file;
+    QFile* m_file = nullptr;
     QByteArray m_stream;
 };
 

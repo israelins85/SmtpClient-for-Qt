@@ -20,21 +20,22 @@
 #include <QFileInfo>
 #include <QMimeDatabase>
 
-MimeFile::MimeFile(QFile *file)
+MimeFile::MimeFile(const QString& fileName)
 {
     QMimeDatabase l_mmDatabase;
     QMimeType l_mmType;
+    QFileInfo l_fileInfo(fileName);
 
-    m_file = file;
+    m_file = new QFile(fileName);
     setContentType("application/octet-stream");
-    setContentName(QFileInfo(*file).fileName());
+    setContentName(l_fileInfo.fileName());
     m_stream.clear();
     setEncoding(Binary);
 
     if (!m_file->isOpen())
         m_file->open(QFile::ReadOnly);
 
-    l_mmType = l_mmDatabase.mimeTypeForFile(file->fileName());
+    l_mmType = l_mmDatabase.mimeTypeForFile(l_fileInfo);
     if (l_mmType.isValid())
         setContentType(l_mmType.name());
 }
