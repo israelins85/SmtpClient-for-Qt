@@ -34,7 +34,7 @@ MimeFile::MimeFile(const QString& fileName, Disposition a_disposition)
     if (!m_file->isOpen())
         m_file->open(QFile::ReadOnly);
 
-    setEncoding((m_file->size() > 4 * 1024) ? Binary : Base64);
+    setEncoding(Base64);
 
     l_mmType = l_mmDatabase.mimeTypeForFile(l_fileInfo);
     if (l_mmType.isValid())

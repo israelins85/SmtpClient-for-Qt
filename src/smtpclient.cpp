@@ -373,7 +373,7 @@ bool SmtpClient::sendMail(MimeMessage& email)
         // Send RCPT command for each recipient
         // To (primary recipients)
         for (const EmailAddress& e : email.getRecipients(MimeMessage::To)) {
-            sendMessage("RCPT TO: <" + e.getAddress() + ">");
+            sendMessage("RCPT TO:<" + e.getAddress() + ">");
             waitForResponse();
 
             if (responseCode != 250) return false;
@@ -381,7 +381,7 @@ bool SmtpClient::sendMail(MimeMessage& email)
 
         // Cc (carbon copy)
         for (const EmailAddress& e : email.getRecipients(MimeMessage::Cc)) {
-            sendMessage("RCPT TO: <" + e.getAddress() + ">");
+            sendMessage("RCPT TO:<" + e.getAddress() + ">");
             waitForResponse();
 
             if (responseCode != 250) return false;
@@ -389,7 +389,7 @@ bool SmtpClient::sendMail(MimeMessage& email)
 
         // Bcc (blind carbon copy)
         for (const EmailAddress& e : email.getRecipients(MimeMessage::Bcc)) {
-            sendMessage("RCPT TO: <" + e.getAddress() + ">");
+            sendMessage("RCPT TO:<" + e.getAddress() + ">");
             waitForResponse();
 
             if (responseCode != 250) return false;

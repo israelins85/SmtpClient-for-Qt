@@ -39,7 +39,7 @@ public:
         Encrypted       = 6             // RFC 1847, section 2.2
     };
 
-    MimeMultiPart(const MultiPartType multiPartType = Related);
+    MimeMultiPart(const MultiPartType multiPartType = Mixed);
 
     ~MimeMultiPart();
 

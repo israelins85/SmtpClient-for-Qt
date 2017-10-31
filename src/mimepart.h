@@ -32,6 +32,7 @@ class SMTP_EXPORT MimePart : public QObject
     Q_OBJECT
 public:
     enum Encoding {
+        Unknow,
         _7Bit,
         _8Bit,
         Base64,

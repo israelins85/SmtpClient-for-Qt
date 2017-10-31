@@ -20,6 +20,7 @@
 #include <QTime>
 #include <QCryptographicHash>
 #include <QIODevice>
+#include <QUuid>
 
 const QString MULTI_PART_NAMES[] = {
     "multipart/mixed",         //    Mixed
@@ -35,11 +36,8 @@ MimeMultiPart::MimeMultiPart(MultiPartType type)
 {
     m_multiPartType = type;
     setContentType(MULTI_PART_NAMES[m_multiPartType]);
-    setEncoding(_8Bit);
-
-    QCryptographicHash md5(QCryptographicHash::Sha1);
-    md5.addData(QByteArray().append(qrand()));
-    setContentBoundary(md5.result().toHex());
+    setEncoding(Unknow);
+    setContentBoundary(QUuid::createUuid().toString().toUtf8());
 }
 
 MimeMultiPart::~MimeMultiPart() {

@@ -204,11 +204,11 @@ void MimeMessage::write(QIODevice* device)
     mime += "MIME-Version: 1.0\r\n";
     mime += QString("Date: %1\r\n").arg(QDateTime::currentDateTime().toString(Qt::RFC2822Date));
 
-//    ProxyIODevice l_proxy(device);
-//    l_proxy.write(mime.toUtf8());
-//    content.write(&l_proxy);
+    ProxyIODevice l_proxy(device);
+    l_proxy.write(mime.toUtf8());
+    content.write(&l_proxy);
 
-    content.write(device);
+//    content.write(device);
 }
 
 /* [3] --- */
