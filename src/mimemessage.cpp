@@ -208,6 +208,7 @@ void MimeMessage::write(QIODevice* device)
 //    l_proxy.write(mime.toUtf8());
 //    content.write(&l_proxy);
 
+    device->write(mime.toUtf8());
     content.write(device);
 }
 
