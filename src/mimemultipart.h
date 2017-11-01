@@ -53,6 +53,8 @@ public:
 
     virtual void write(QIODevice* device) const;
 
+    qint64 estimatedContentSize() const;
+
     qint64 contentSize() const { return -1; }
     QByteArray readContent(qint64 /*a_offset*/, qint64 /*bytes2Read*/) const {
         return QByteArray();

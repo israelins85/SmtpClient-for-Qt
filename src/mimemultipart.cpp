@@ -68,6 +68,15 @@ void MimeMultiPart::write(QIODevice* device) const
     device->write("\r\n");
 }
 
+qint64 MimeMultiPart::estimatedContentSize() const
+{
+    qint64 l_sum = 0;
+    for (MimePart* l_mp : m_parts) {
+        l_sum += l_mp->estimatedContentSize();
+    }
+    return l_sum;
+}
+
 void MimeMultiPart::setMultPartType(const MultiPartType type) {
     m_multiPartType = type;
     setContentType(MULTI_PART_NAMES[type]);

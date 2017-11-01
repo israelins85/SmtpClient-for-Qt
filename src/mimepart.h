@@ -73,6 +73,10 @@ public:
 
     MimeContentFormatter& contentFormatter();
 
+    virtual qint64 estimatedContentSize() const {
+        return contentSize();
+    }
+
     virtual qint64 contentSize() const = 0;
     virtual QByteArray readContent() const;
     virtual QByteArray readContent(qint64 a_offset, qint64 bytes2Read) const = 0;
