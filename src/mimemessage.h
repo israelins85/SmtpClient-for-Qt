@@ -57,7 +57,7 @@ public:
 
     MimeMultiPart& getContent();
 
-    void write(QIODevice* device);
+    bool write(QIODevice* device, qint32 timeout);
 
 protected:
     EmailAddress sender;

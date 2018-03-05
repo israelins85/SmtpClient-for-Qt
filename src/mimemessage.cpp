@@ -149,7 +149,7 @@ protected:
 
 
 
-void MimeMessage::write(QIODevice* device)
+bool MimeMessage::write(QIODevice* device, qint32 timeout)
 {
     QString mime;
 
@@ -209,7 +209,8 @@ void MimeMessage::write(QIODevice* device)
 //    content.write(&l_proxy);
 
     device->write(mime.toUtf8());
-    content.write(device);
+    if (!device->waitForBytesWritten(timeout)) return false;
+    return content.write(device, timeout);
 }
 
 /* [3] --- */

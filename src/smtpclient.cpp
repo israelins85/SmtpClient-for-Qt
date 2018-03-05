@@ -32,8 +32,8 @@ SmtpClient::SmtpClient(const QString & host, int port, ConnectionType connection
     socket(NULL),
     name("localhost"),
     authMethod(AuthPlain),
-    connectionTimeout(5000),
-    responseTimeout(5000),
+    connectionTimeout(60000),
+    responseTimeout(5 * 60000),
     sendMessageTimeout(60000)
 {
     setConnectionType(connectionType);
@@ -401,7 +401,10 @@ bool SmtpClient::sendMail(MimeMessage& email)
 
         if (responseCode != 354) return false;
 
-        email.write(socket);
+        if (!email.write(socket, sendMessageTimeout)) {
+          emit smtpError(SendDataTimeoutError);
+          throw SendMessageTimeoutException();
+        }
         sendMessage("");
 
         // Send \r\n.\r\n to end the mail data
@@ -455,6 +458,8 @@ void SmtpClient::waitForResponse()
                 throw ResponseTimeoutException();
                 l_evLoop.quit();
             });
+
+            l_timer.start(responseTimeout);
 
             l_evLoop.exec();
         }

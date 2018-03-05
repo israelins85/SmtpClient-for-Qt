@@ -52,7 +52,7 @@ const QList<MimePart*> & MimeMultiPart::getParts() const {
     return m_parts;
 }
 
-void MimeMultiPart::write(QIODevice* device) const
+bool MimeMultiPart::write(QIODevice* device, qint32 timeout) const
 {
     writeHeader(device);
 
@@ -61,11 +61,14 @@ void MimeMultiPart::write(QIODevice* device) const
     for (MimePart* l_mp : m_parts) {
         device->write(l_contentBoundary);
         device->write("\r\n");
-        l_mp->write(device);
+        if (!l_mp->write(device, timeout)) {
+            return false;
+        }
     }
     device->write(l_contentBoundary);
     device->write("--");
     device->write("\r\n");
+    return device->waitForBytesWritten(timeout);
 }
 
 qint64 MimeMultiPart::estimatedContentSize() const

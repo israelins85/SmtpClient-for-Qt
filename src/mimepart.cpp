@@ -196,9 +196,10 @@ void MimePart::writeHeader(QIODevice* device) const
     device->write("\r\n");
 }
 
-void MimePart::write(QIODevice* device) const
+bool MimePart::write(QIODevice* device, qint32 a_timeout) const
 {
     writeHeader(device);
+    if (!device->waitForBytesWritten(a_timeout)) return false;
 
     /* === Content === */
     switch (m_cEncoding)
@@ -242,13 +243,15 @@ void MimePart::write(QIODevice* device) const
             QByteArray l_data = readContent(l_offset, 64 * 1024);
             device->write(l_data);
             l_offset += l_data.size();
-            qApp->processEvents();
+            if (!device->waitForBytesWritten(a_timeout)) return false;
         }
     } break;
     case Unknow:
         break;
     }
     device->write("\r\n");
+
+    return device->waitForBytesWritten(a_timeout);
     /* === End of Content === */
 }
 

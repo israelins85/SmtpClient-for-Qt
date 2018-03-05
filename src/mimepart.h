@@ -82,7 +82,7 @@ public:
     virtual QByteArray readContent(qint64 a_offset, qint64 bytes2Read) const = 0;
 
     virtual void writeHeader(QIODevice* device) const;
-    virtual void write(QIODevice* device) const;
+    virtual bool write(QIODevice* device, qint32 a_timeout) const;
 
 private:
     QMap<QString, QString> m_header;

@@ -51,7 +51,7 @@ public:
     const QList<MimePart*> & getParts() const;
     void addPart(MimePart *part);
 
-    virtual void write(QIODevice* device) const;
+    virtual bool write(QIODevice* device, qint32 timeout) const;
 
     qint64 estimatedContentSize() const;
 
