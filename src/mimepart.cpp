@@ -182,7 +182,7 @@ void MimePart::writeHeader(QIODevice* device) const
         l_header["Content-Size"] = QString::number(contentSize());
 
     /* Content-Id */
-    if (m_cId != NULL)
+    if (m_cId != nullptr)
         l_header["Content-ID"] = m_cId;
     /* ---------- */
 

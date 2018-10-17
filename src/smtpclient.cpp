@@ -29,7 +29,7 @@ Q_LOGGING_CATEGORY(smtpClient, "SmtpClient")
 /* [1] Constructors and destructors */
 
 SmtpClient::SmtpClient(const QString & host, int port, ConnectionType connectionType) :
-    socket(NULL),
+    socket(nullptr),
     name("localhost"),
     authMethod(AuthPlain),
     connectionTimeout(60000),
