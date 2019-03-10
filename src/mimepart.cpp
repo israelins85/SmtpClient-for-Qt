@@ -225,6 +225,7 @@ bool MimePart::write(QIODevice* device, qint32 a_timeout) const
                 device->write(l_base64.left(76) + "\r\n");
                 l_base64 = l_base64.mid(76);
             }
+            if (!device->waitForBytesWritten(a_timeout)) return false;
 
             l_offset += l_data.size();
             qApp->processEvents();
