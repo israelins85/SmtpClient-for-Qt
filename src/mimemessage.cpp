@@ -139,14 +139,18 @@ protected:
         qDebug() << QByteArray(data, len);
         return m_source->write(data, len);
     }
+    virtual bool waitForReadyRead(int msecs) Q_DECL_OVERRIDE
+    {
+        return m_source->waitForReadyRead(msecs);
+    }
+    virtual bool waitForBytesWritten(int msecs) Q_DECL_OVERRIDE
+    {
+        return m_source->waitForBytesWritten(msecs);
+    }
 
-    private:
+private:
     QIODevice* m_source;
 };
-
-
-
-
 
 
 bool MimeMessage::write(QIODevice* device, qint32 timeout)
@@ -198,9 +202,9 @@ bool MimeMessage::write(QIODevice* device, qint32 timeout)
     /* ------------ Subject ------------- */
     mime += "Subject: ";
     mime += MimePart::encodeString(subject, hEncoding);
+    mime += "\r\n";
     /* ---------------------------------- */
 
-    mime += "\r\n";
     mime += "MIME-Version: 1.0\r\n";
     mime += QString("Date: %1\r\n").arg(QDateTime::currentDateTimeUtc().toLocalTime().toString(Qt::RFC2822Date));
 
