@@ -98,3 +98,4 @@ This project (all files including the demos/examples) is licensed under the GNU 
 
 
 **Copyright (c) 2011 - Tőkés Attila**
+**Copyright (c) 2019 - Israel Lins**
