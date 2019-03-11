@@ -364,7 +364,7 @@ bool SmtpClient::sendMail(MimeMessage& email)
     try
     {
         // Send the MAIL command with the sender
-        sendMessage("MAIL FROM: <" + email.getSender().getAddress() + ">");
+        sendMessage("MAIL FROM:<" + email.getSender().getAddress() + ">");
 
         waitForResponse();
 
@@ -375,7 +375,6 @@ bool SmtpClient::sendMail(MimeMessage& email)
         for (const EmailAddress& e : email.getRecipients(MimeMessage::To)) {
             sendMessage("RCPT TO:<" + e.getAddress() + ">");
             waitForResponse();
-
             if (responseCode != 250) return false;
         }
 
@@ -383,7 +382,6 @@ bool SmtpClient::sendMail(MimeMessage& email)
         for (const EmailAddress& e : email.getRecipients(MimeMessage::Cc)) {
             sendMessage("RCPT TO:<" + e.getAddress() + ">");
             waitForResponse();
-
             if (responseCode != 250) return false;
         }
 
@@ -391,7 +389,6 @@ bool SmtpClient::sendMail(MimeMessage& email)
         for (const EmailAddress& e : email.getRecipients(MimeMessage::Bcc)) {
             sendMessage("RCPT TO:<" + e.getAddress() + ">");
             waitForResponse();
-
             if (responseCode != 250) return false;
         }
 

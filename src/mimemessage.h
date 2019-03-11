@@ -41,6 +41,7 @@ public:
     ~MimeMessage();
 
     void setSender(const EmailAddress& e);
+    void setReplyTo(const EmailAddress& rto);
     void addRecipient(const EmailAddress& rcpt, RecipientType type = To);
     void addTo(const EmailAddress& rcpt);
     void addCc(const EmailAddress& rcpt);
@@ -48,12 +49,15 @@ public:
     void setSubject(const QString & subject);
     void addPart(MimePart* part);
 
+    void setInReplyTo(const QString& inReplyTo);
+
     void setHeaderEncoding(MimePart::Encoding);
 
     const EmailAddress & getSender() const;
     const QList<EmailAddress> & getRecipients(RecipientType type = To) const;
     const QString & getSubject() const;
     const QList<MimePart*> & getParts() const;
+    const EmailAddress& getReplyTo() const;
 
     MimeMultiPart& getContent();
 
@@ -61,6 +65,8 @@ public:
 
 protected:
     EmailAddress sender;
+    EmailAddress replyTo;
+    QString mInReplyTo;
     QList<EmailAddress> recipientsTo, recipientsCc, recipientsBcc;
     QString subject;
     MimeMultiPart content;

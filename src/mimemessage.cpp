@@ -1,4 +1,4 @@
-/*
+﻿/*
   Copyright (c) 2011-2012 - Tőkés Attila
 
   This file is part of SmtpClient for Qt.
@@ -39,9 +39,12 @@ MimeMultiPart& MimeMessage::getContent() {
     return content;
 }
 
-void MimeMessage::setSender(const EmailAddress& e)
-{
+void MimeMessage::setSender(const EmailAddress& e) {
     this->sender = e;
+}
+
+void MimeMessage::setReplyTo(const EmailAddress& rto) {
+    replyTo = rto;
 }
 
 void MimeMessage::addRecipient(const EmailAddress& rcpt, RecipientType type)
@@ -82,6 +85,11 @@ void MimeMessage::addPart(MimePart *part)
     content.addPart(part);
 }
 
+void MimeMessage::setInReplyTo(const QString& inReplyTo)
+{
+    mInReplyTo = inReplyTo;
+}
+
 void MimeMessage::setHeaderEncoding(MimePart::Encoding hEnc)
 {
     this->hEncoding = hEnc;
@@ -104,6 +112,10 @@ const QList<EmailAddress>& MimeMessage::getRecipients(MimeMessage::RecipientType
     case Bcc:
         return recipientsBcc;
     }
+}
+
+const EmailAddress& MimeMessage::getReplyTo() const {
+    return replyTo;
 }
 
 const QString & MimeMessage::getSubject() const
@@ -165,7 +177,6 @@ bool MimeMessage::write(QIODevice* device, qint32 timeout)
     mime += "\r\n";
     /* ---------------------------------- */
 
-
     /* ------- Recipients / To ---------- */    
     if (!recipientsTo.isEmpty()) {
         mime += "To:";
@@ -199,18 +210,40 @@ bool MimeMessage::write(QIODevice* device, qint32 timeout)
     }
     /* ---------------------------------- */
 
+
+    /* ------------ In-Reply-To ------------- */
+    if (!mInReplyTo.isEmpty()) {
+        mime += "In-Reply-To: <" + mInReplyTo + ">\r\n";
+        mime += "References: <" + mInReplyTo + ">\r\n";
+    }
+    /* ---------------------------------- */
+
     /* ------------ Subject ------------- */
     mime += "Subject: ";
     mime += MimePart::encodeString(subject, hEncoding);
     mime += "\r\n";
     /* ---------------------------------- */
 
+    /* ---------- Reply-To -------------- */
+    if (!replyTo.getAddress().isEmpty()) {
+        mime += "Reply-To: ";
+        mime += replyTo.encoded(hEncoding);
+        mime += "\r\n";
+    }
+    /* ---------------------------------- */
+
     mime += "MIME-Version: 1.0\r\n";
-    mime += QString("Date: %1\r\n").arg(QDateTime::currentDateTimeUtc().toLocalTime().toString(Qt::RFC2822Date));
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0) //Qt4 workaround since RFC2822Date isn't defined
+    mime += QString("Date: %1\r\n").arg(QDateTime::currentDateTime().toString("dd MMM yyyy hh:mm:ss +/-TZ"));
+#else //Qt5 supported
+    mime += QString("Date: %1\r\n").arg(QDateTime::currentDateTime().toString(Qt::RFC2822Date));
+#endif //support RFC2822Date
 
 //    ProxyIODevice l_proxy(device);
 //    l_proxy.write(mime.toUtf8());
 //    content.write(&l_proxy);
+//    return true;
 
     device->write(mime.toUtf8());
     if (!device->waitForBytesWritten(timeout)) return false;
