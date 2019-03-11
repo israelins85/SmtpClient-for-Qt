@@ -3,6 +3,14 @@ SMTP Client for Qt (C++) - Version 1.1
 
 The SmtpClient for Qt is small library writen for Qt 4 (C++ version) that allows application to send complex emails (plain text, html, attachments, inline files, etc.) using the Simple Mail Transfer Protocol (SMTP).
 
+## New in version 2:
+
+- less use of pointers;
+
+- less memory usage to sending attachements;
+
+- constant flush to socket to check connection status;
+
 ## New in version 1.1:
 
 - TLS (STARTTLS) connection is now supported
@@ -59,20 +67,18 @@ int main(int argc, char *argv[])
 
     MimeMessage message;
 
-    message.setSender(new EmailAddress("your_email_address@gmail.com", "Your Name"));
-    message.addRecipient(new EmailAddress("recipient@host.com", "Recipient's Name"));
+    message.setSender(EmailAddress("your_email_address@gmail.com", "Your Name"));
+    message.addRecipient(EmailAddress("recipient@host.com", "Recipient's Name"));
     message.setSubject("SmtpClient for Qt - Demo");
 
     // Now add some text to the email.
     // First we create a MimeText object.
 
-    MimeText text;
+    MimeText* text = new MimeText("Hi,\nThis is a simple email message.\n");
 
-    text.setText("Hi,\nThis is a simple email message.\n");
+    // Now add it to the mail (always takes ownership)
 
-    // Now add it to the mail
-
-    message.addPart(&text);
+    message.addPart(text);
 
     // Now we can send the mail
 
