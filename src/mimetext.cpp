@@ -46,5 +46,5 @@ qint64 MimeText::contentSize() const
 
 QByteArray MimeText::readContent(qint64 a_offset, qint64 bytes2Read) const
 {
-    return m_textUtf8.mid(a_offset, bytes2Read);
+    return m_textUtf8.mid(qint32(a_offset), qint32(bytes2Read));
 }
