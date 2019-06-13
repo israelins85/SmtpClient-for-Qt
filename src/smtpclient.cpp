@@ -444,6 +444,9 @@ void SmtpClient::quit()
 
 void SmtpClient::waitForResponse()
 {
+    responseCode = -1;
+    responseText.clear();
+
     do {
         if (!socket->canReadLine()) {
             QEventLoop l_evLoop;
@@ -452,7 +455,7 @@ void SmtpClient::waitForResponse()
             connect(socket, &QTcpSocket::readyRead, &l_evLoop, &QEventLoop::quit);
             connect(&l_timer, &QTimer::timeout, &l_evLoop, [&l_evLoop, this]() {
                 emit smtpError(ResponseTimeoutError);
-                throw ResponseTimeoutException();
+//                throw ResponseTimeoutException();
                 l_evLoop.quit();
             });
 
