@@ -398,18 +398,19 @@ bool SmtpClient::sendMail(MimeMessage& email)
 
         if (responseCode != 354) return false;
 
-        if (!email.write(socket, sendMessageTimeout)) {
-          emit smtpError(SendDataTimeoutError);
-          throw SendMessageTimeoutException();
+        if (email.write(socket, sendMessageTimeout)) {
+            sendMessage("");
+
+            // Send \r\n.\r\n to end the mail data
+            sendMessage(".");
+
+            waitForResponse();
+
+            if (responseCode != 250) return false;
+        } else {
+            emit smtpError(SendDataTimeoutError);
+//          throw SendMessageTimeoutException();
         }
-        sendMessage("");
-
-        // Send \r\n.\r\n to end the mail data
-        sendMessage(".");
-
-        waitForResponse();
-
-        if (responseCode != 250) return false;
     }
     catch (ResponseTimeoutException)
     {
@@ -496,6 +497,10 @@ void SmtpClient::sendMessage(const char* text)
 
 void SmtpClient::sendMessage(const QByteArray& data)
 {
+    if (!socket->isOpen()) {
+        return;
+    }
+
     if (data.size() > 1024)
         qCDebug(smtpClient) << "SEND: " << (data.left(1024 - 3) + "...");
     else
@@ -505,7 +510,7 @@ void SmtpClient::sendMessage(const QByteArray& data)
     if (! socket->waitForBytesWritten(sendMessageTimeout))
     {
       emit smtpError(SendDataTimeoutError);
-      throw SendMessageTimeoutException();
+//      throw SendMessageTimeoutException();
     }
 }
 
