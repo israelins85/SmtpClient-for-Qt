@@ -25,7 +25,6 @@
 
 Q_LOGGING_CATEGORY(smtpClient, "SmtpClient")
 
-
 /* [1] Constructors and destructors */
 
 SmtpClient::SmtpClient(const QString & host, int port, ConnectionType connectionType) :
@@ -99,6 +98,8 @@ void SmtpClient::setConnectionType(ConnectionType ct)
     case SslConnection:
     case TlsConnection:
         socket = new QSslSocket(this);
+        connect(socket, SIGNAL(sslErrors(QList<QSslError>)), this, SLOT(ignoreSslErrors(QList<QSslError>)));
+        break;
     }
 }
 
@@ -191,6 +192,7 @@ void SmtpClient::setSendMessageTimeout(int msec)
 
 bool SmtpClient::connectToHost()
 {
+    qCDebug(smtpClient) << "starting connection";
     switch (connectionType)
     {
     case TlsConnection:
@@ -210,6 +212,7 @@ bool SmtpClient::connectToHost()
         return false;
     }
 
+    qCDebug(smtpClient) << "starting comunication";
     try
     {
         // Wait for the server's response
@@ -236,7 +239,9 @@ bool SmtpClient::connectToHost()
             return false;
         }
 
-        if (connectionType == TlsConnection) {
+        QSslSocket* sslSocket = qobject_cast<QSslSocket*>(socket);
+
+        if (sslSocket && (sslSocket->mode() == QSslSocket::UnencryptedMode)) {
             // send a request to start TLS handshake
             sendMessage("STARTTLS");
 
@@ -249,10 +254,10 @@ bool SmtpClient::connectToHost()
                 return false;
             };
 
-            ((QSslSocket*) socket)->startClientEncryption();
+            sslSocket->startClientEncryption();
 
-            if (!((QSslSocket*) socket)->waitForEncrypted(connectionTimeout)) {
-                qCDebug(smtpClient) << ((QSslSocket*) socket)->errorString();
+            if (!sslSocket->waitForEncrypted(connectionTimeout)) {
+                qCDebug(smtpClient) << socket->errorString();
                 emit smtpError(ConnectionTimeoutError);
                 return false;
             }
@@ -438,6 +443,16 @@ void SmtpClient::quit()
     }
 }
 
+void SmtpClient::ignoreSslErrors(const QList<QSslError>& errors)
+{
+    for (QSslError err : errors) {
+        qCDebug(smtpClient) << err.errorString();
+    }
+
+    QSslSocket* sslSocket = qobject_cast<QSslSocket*>(socket);
+    if (sslSocket) sslSocket->ignoreSslErrors(errors);
+}
+
 /* [3] --- */
 
 
@@ -448,8 +463,8 @@ void SmtpClient::waitForResponse()
     responseCode = -1;
     responseText.clear();
 
-    do {
-        if (!socket->canReadLine()) {
+    while (socket->isReadable()) {
+        if (!socket->waitForBytesWritten(500)) {
             QEventLoop l_evLoop;
             QTimer l_timer;
 
@@ -472,7 +487,7 @@ void SmtpClient::waitForResponse()
             qCDebug(smtpClient) << "RECV: " << responseText;
 
             // Extract the respose code from the server's responce (first 3 digits)
-            responseCode = responseText.left(3).toInt();
+            responseCode = responseText.leftRef(3).toInt();
 
             if (responseCode / 100 == 4)
                 emit smtpError(ServerError);
@@ -482,7 +497,7 @@ void SmtpClient::waitForResponse()
 
             if (responseText[3] == ' ') { return; }
         }
-    } while (true);
+    }
 }
 
 void SmtpClient::sendMessage(const QString &text)

@@ -122,6 +122,8 @@ public:
 
     void quit();
 
+protected slots:
+    void ignoreSslErrors(const QList<QSslError> & errors);
 
     /* [3] --- */
 
