@@ -24,7 +24,7 @@
 
 MimePart::MimePart()
 {
-    m_cEncoding = _7Bit;
+    m_cEncoding = Encoding::_7Bit;
     m_cBoundary = "";
 }
 
@@ -113,10 +113,10 @@ QByteArray MimePart::encodeString(const QString& a_string, MimePart::Encoding a_
     QByteArray l_ret;
     switch (a_encode)
     {
-    case MimePart::Base64:
+    case MimePart::Encoding::Base64:
         l_ret += "=?utf-8?B?" + QByteArray().append(a_string).toBase64() + "?=";
         break;
-    case MimePart::QuotedPrintable:
+    case MimePart::Encoding::QuotedPrintable:
         l_ret += "=?utf-8?Q?" + QuotedPrintable::encode(QByteArray().append(a_string)).replace(' ', "_").replace(':',"=3A") + "?=";
         break;
     default:
@@ -159,26 +159,26 @@ void MimePart::writeHeader(QIODevice* device) const
     /* Content-Transfer-Encoding */
     switch (m_cEncoding)
     {
-    case _7Bit:
+    case Encoding::_7Bit:
         l_header["Content-Transfer-Encoding"] = "7bit";
         break;
-    case _8Bit:
+    case Encoding::_8Bit:
         l_header["Content-Transfer-Encoding"] = "8bit";
         break;
-    case Base64:
+    case Encoding::Base64:
         l_header["Content-Transfer-Encoding"] = "base64";
         break;
-    case QuotedPrintable:
+    case Encoding::QuotedPrintable:
         l_header["Content-Transfer-Encoding"] = "quoted-printable";
         break;
-    case Binary:
+    case Encoding::Binary:
         l_header["Content-Transfer-Encoding"] = "binary";
         break;
-    case Unknow:
+    case Encoding::Unknow:
         break;
     }
     /* ------------------------ */
-    if (m_cEncoding == Binary)
+    if (m_cEncoding == Encoding::Binary)
         l_header["Content-Size"] = QString::number(contentSize());
 
     /* Content-Id */
@@ -204,13 +204,13 @@ bool MimePart::write(QIODevice* device, qint32 a_timeout) const
     /* === Content === */
     switch (m_cEncoding)
     {
-    case _7Bit:
+    case Encoding::_7Bit:
         device->write(QString(readContent()).toLatin1());
         break;
-    case _8Bit:
+    case Encoding::_8Bit:
         device->write(readContent());
         break;
-    case Base64: {
+    case Encoding::Base64: {
         qint64 l_offset = 0;
         qint64 l_total = contentSize();
         qint32 l_chuckSize = 3 * 64 * 1024;
@@ -234,10 +234,10 @@ bool MimePart::write(QIODevice* device, qint32 a_timeout) const
         if (!l_base64.isEmpty())
             device->write(l_base64 + "\r\n");
     } break;
-    case QuotedPrintable:
+    case Encoding::QuotedPrintable:
         device->write(m_formatter.format(QuotedPrintable::encode(readContent()), true).toUtf8());
         break;
-    case Binary: {
+    case Encoding::Binary: {
         qint64 l_offset = 0;
         qint64 l_total = contentSize();
         while (l_offset < l_total) {
@@ -247,7 +247,7 @@ bool MimePart::write(QIODevice* device, qint32 a_timeout) const
             if (!device->waitForBytesWritten(a_timeout)) return false;
         }
     } break;
-    case Unknow:
+    case Encoding::Unknow:
         break;
     }
     device->write("\r\n");

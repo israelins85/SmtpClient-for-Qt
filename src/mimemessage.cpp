@@ -25,7 +25,7 @@
 
 /* [1] Constructors and Destructors */
 MimeMessage::MimeMessage() :
-    hEncoding(MimePart::_8Bit)
+    m_hEncoding(MimePart::Encoding::_8Bit)
 {}
 
 MimeMessage::~MimeMessage()
@@ -35,97 +35,97 @@ MimeMessage::~MimeMessage()
 
 
 /* [2] Getters and Setters */
-MimeMultiPart& MimeMessage::getContent() {
-    return content;
+MimeMultiPart& MimeMessage::content() {
+    return m_content;
 }
 
 void MimeMessage::setSender(const EmailAddress& e) {
-    this->sender = e;
+    m_sender = e;
 }
 
 void MimeMessage::setReplyTo(const EmailAddress& rto) {
-    replyTo = rto;
+    m_replyTo = rto;
 }
 
 void MimeMessage::addRecipient(const EmailAddress& rcpt, RecipientType type)
 {
     switch (type)
     {
-    case To:
-        recipientsTo << rcpt;
+    case RecipientType::To:
+        m_recipientsTo << rcpt;
         break;
-    case Cc:
-        recipientsCc << rcpt;
+    case RecipientType::Cc:
+        m_recipientsCc << rcpt;
         break;
-    case Bcc:
-        recipientsBcc << rcpt;
+    case RecipientType::Bcc:
+        m_recipientsBcc << rcpt;
         break;
     }
 }
 
 void MimeMessage::addTo(const EmailAddress& rcpt) {
-    this->recipientsTo << rcpt;
+    m_recipientsTo << rcpt;
 }
 
 void MimeMessage::addCc(const EmailAddress& rcpt) {
-    this->recipientsCc << rcpt;
+    m_recipientsCc << rcpt;
 }
 
 void MimeMessage::addBcc(const EmailAddress& rcpt) {
-    this->recipientsBcc << rcpt;
+    m_recipientsBcc << rcpt;
 }
 
 void MimeMessage::setSubject(const QString& subject)
 {
-    this->subject = subject;
+    m_subject = subject;
 }
 
 void MimeMessage::addPart(MimePart *part)
 {
-    content.addPart(part);
+    m_content.addPart(part);
 }
 
 void MimeMessage::setInReplyTo(const QString& inReplyTo)
 {
-    mInReplyTo = inReplyTo;
+    m_mInReplyTo = inReplyTo;
 }
 
 void MimeMessage::setHeaderEncoding(MimePart::Encoding hEnc)
 {
-    this->hEncoding = hEnc;
+    m_hEncoding = hEnc;
 }
 
-const EmailAddress& MimeMessage::getSender() const
+const EmailAddress& MimeMessage::sender() const
 {
-    return sender;
+    return m_sender;
 }
 
-const QList<EmailAddress>& MimeMessage::getRecipients(MimeMessage::RecipientType type) const
+const QList<EmailAddress>& MimeMessage::recipients(MimeMessage::RecipientType type) const
 {
     switch (type)
     {
     default:
-    case To:
-        return recipientsTo;
-    case Cc:
-        return recipientsCc;
-    case Bcc:
-        return recipientsBcc;
+    case RecipientType::To:
+        return m_recipientsTo;
+    case RecipientType::Cc:
+        return m_recipientsCc;
+    case RecipientType::Bcc:
+        return m_recipientsBcc;
     }
 }
 
-const EmailAddress& MimeMessage::getReplyTo() const {
-    return replyTo;
+const EmailAddress& MimeMessage::replyTo() const {
+    return m_replyTo;
 }
 
-const QString & MimeMessage::getSubject() const
+const QString & MimeMessage::subject() const
 {
-    return subject;
+    return m_subject;
 }
 
-const QList<MimePart*> & MimeMessage::getParts() const
+const QList<MimePart*> & MimeMessage::parts() const
 {
-    return content.getParts();
+    return m_content.getParts();
 }
 
 /* [2] --- */
@@ -173,15 +173,15 @@ bool MimeMessage::write(QIODevice* device, qint32 timeout)
 
     /* ---------- Sender / From ----------- */
     mime = "From:";
-    mime += sender.encoded(hEncoding);
+    mime += m_sender.encoded(m_hEncoding);
     mime += "\r\n";
     /* ---------------------------------- */
 
     /* ------- Recipients / To ---------- */    
-    if (!recipientsTo.isEmpty()) {
+    if (!m_recipientsTo.isEmpty()) {
         mime += "To:";
-        for (const EmailAddress& l_rcp : recipientsTo) {
-            mime += l_rcp.encoded(hEncoding) + ",";
+        for (const EmailAddress& l_rcp : m_recipientsTo) {
+            mime += l_rcp.encoded(m_hEncoding) + ",";
         }
         mime.chop(1);
         mime += "\r\n";
@@ -189,10 +189,10 @@ bool MimeMessage::write(QIODevice* device, qint32 timeout)
     /* ---------------------------------- */
 
     /* ------- Recipients / Cc ---------- */
-    if (!recipientsCc.isEmpty()) {
+    if (!m_recipientsCc.isEmpty()) {
         mime += "Cc:";
-        for (const EmailAddress& l_rcp : recipientsCc) {
-            mime += l_rcp.encoded(hEncoding) + ",";
+        for (const EmailAddress& l_rcp : m_recipientsCc) {
+            mime += l_rcp.encoded(m_hEncoding) + ",";
         }
         mime.chop(1);
         mime += "\r\n";
@@ -200,10 +200,10 @@ bool MimeMessage::write(QIODevice* device, qint32 timeout)
     /* ---------------------------------- */
 
     /* ------- Recipients / Bcc ---------- */
-    if (!recipientsCc.isEmpty()) {
+    if (!m_recipientsCc.isEmpty()) {
         mime += "Bcc:";
-        for (const EmailAddress& l_rcp : recipientsBcc) {
-            mime += l_rcp.encoded(hEncoding) + ",";
+        for (const EmailAddress& l_rcp : m_recipientsBcc) {
+            mime += l_rcp.encoded(m_hEncoding) + ",";
         }
         mime.chop(1);
         mime += "\r\n";
@@ -212,22 +212,22 @@ bool MimeMessage::write(QIODevice* device, qint32 timeout)
 
 
     /* ------------ In-Reply-To ------------- */
-    if (!mInReplyTo.isEmpty()) {
-        mime += "In-Reply-To: <" + mInReplyTo + ">\r\n";
-        mime += "References: <" + mInReplyTo + ">\r\n";
+    if (!m_mInReplyTo.isEmpty()) {
+        mime += "In-Reply-To: <" + m_mInReplyTo + ">\r\n";
+        mime += "References: <" + m_mInReplyTo + ">\r\n";
     }
     /* ---------------------------------- */
 
     /* ------------ Subject ------------- */
     mime += "Subject: ";
-    mime += MimePart::encodeString(subject, hEncoding);
+    mime += MimePart::encodeString(m_subject, m_hEncoding);
     mime += "\r\n";
     /* ---------------------------------- */
 
     /* ---------- Reply-To -------------- */
-    if (!replyTo.getAddress().isEmpty()) {
+    if (!m_replyTo.isEmpty()) {
         mime += "Reply-To: ";
-        mime += replyTo.encoded(hEncoding);
+        mime += m_replyTo.encoded(m_hEncoding);
         mime += "\r\n";
     }
     /* ---------------------------------- */
@@ -247,7 +247,7 @@ bool MimeMessage::write(QIODevice* device, qint32 timeout)
 
     device->write(mime.toUtf8());
     if (!device->waitForBytesWritten(timeout)) return false;
-    return content.write(device, timeout);
+    return m_content.write(device, timeout);
 }
 
 /* [3] --- */

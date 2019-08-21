@@ -34,9 +34,8 @@ const QString MULTI_PART_NAMES[] = {
 
 MimeMultiPart::MimeMultiPart(MultiPartType type)
 {
-    m_multiPartType = type;
-    setContentType(MULTI_PART_NAMES[m_multiPartType]);
-    setEncoding(Unknow);
+    setMultPartType(type);
+    setEncoding(Encoding::Unknow);
     setContentBoundary(QUuid::createUuid().toString().toUtf8());
 }
 
@@ -82,7 +81,7 @@ qint64 MimeMultiPart::estimatedContentSize() const
 
 void MimeMultiPart::setMultPartType(const MultiPartType type) {
     m_multiPartType = type;
-    setContentType(MULTI_PART_NAMES[type]);
+    setContentType(MULTI_PART_NAMES[qint32(m_multiPartType)]);
 }
 
 MimeMultiPart::MultiPartType MimeMultiPart::multPartType() const {

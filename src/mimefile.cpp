@@ -34,7 +34,7 @@ MimeFile::MimeFile(const QString& fileName, Disposition a_disposition)
     if (!m_file->isOpen())
         m_file->open(QFile::ReadOnly);
 
-    setEncoding(Base64);
+    setEncoding(Encoding::Base64);
 
     l_mmType = l_mmDatabase.mimeTypeForFile(l_fileInfo);
     if (l_mmType.isValid())
@@ -52,7 +52,7 @@ MimeFile::MimeFile(const QByteArray& stream, const QString& fileName, Dispositio
     setContentType("application/octet-stream");
     setContentName(fileName);
     m_stream = stream;
-    setEncoding(Base64);
+    setEncoding(Encoding::Base64);
 
     l_mmType = l_mmDatabase.mimeTypeForFileNameAndData(fileName, m_stream);
     if (l_mmType.isValid())

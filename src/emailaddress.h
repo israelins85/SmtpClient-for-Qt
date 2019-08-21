@@ -29,33 +29,18 @@ public:
     /* [1] Constructors and Destructors */
 
     EmailAddress();
-    EmailAddress(const QString & address, const QString & name="");
+    EmailAddress(const char* a_address);
+    EmailAddress(const QString & a_address);
+    explicit EmailAddress(const QString & a_address, const QString & a_name);
 
     ~EmailAddress();
 
-    /* [1] --- */
-
-
-    /* [2] Getters and Setters */
-    void setName(const QString & name);
-    void setAddress(const QString & address);
-
-    const QString & getName() const;
-    const QString & getAddress() const;
+    bool isEmpty() const;
 
     QByteArray encoded(MimePart::Encoding a_encode) const;
 
-    /* [2] --- */
-
-
-private:
-
-    /* [3] Private members */
-
     QString name;
     QString address;
-
-    /* [3] --- */
 };
 
 #endif // EMAILADDRESS_H

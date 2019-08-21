@@ -29,7 +29,7 @@ class SMTP_EXPORT MimeMultiPart : public MimePart
 public:
 
     /* [0] Enums */
-    enum MultiPartType {
+    enum class MultiPartType {
         Mixed           = 0,            // RFC 2046, section 5.1.3
         Digest          = 1,            // RFC 2046, section 5.1.5
         Alternative     = 2,            // RFC 2046, section 5.1.4
@@ -38,8 +38,9 @@ public:
         Signed          = 5,            // RFC 1847, section 2.1
         Encrypted       = 6             // RFC 1847, section 2.2
     };
+    Q_ENUM(MultiPartType)
 
-    MimeMultiPart(const MultiPartType multiPartType = Mixed);
+    MimeMultiPart(const MultiPartType multiPartType = MultiPartType::Mixed);
 
     ~MimeMultiPart();
 

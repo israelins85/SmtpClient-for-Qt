@@ -28,95 +28,99 @@
 
 Q_DECLARE_LOGGING_CATEGORY(smtpClient)
 
+class SmtpClientPrivate;
 class SMTP_EXPORT SmtpClient : public QObject
 {
     Q_OBJECT
+    QScopedPointer<SmtpClientPrivate> const d_ptr;
+//     Q_DECLARE_PRIVATE(SmtpClient)
+    inline SmtpClientPrivate* d_func() {
+        return reinterpret_cast<SmtpClientPrivate *>(qGetPtrHelper(d_ptr));
+    }
+    inline const SmtpClientPrivate* d_func() const {
+        return reinterpret_cast<const SmtpClientPrivate *>(qGetPtrHelper(d_ptr));
+    }
+    friend class SmtpClientPrivate;
+
 public:
+    enum class AuthMethod {
+        Auto,
+        Plain,
+        Login
+    };
+    Q_ENUM(AuthMethod)
 
-    /* [0] Enumerations */
+    enum class SmtpErrorType {
+        NoError,
+        ConnectionTimeout,
+        ResponseTimeout,
+        SendDataTimeout,
+        AuthenticationFailed,
+        Server,    // 4xx smtp error
+        Client     // 5xx smtp error
+    };
+    Q_ENUM(SmtpErrorType)
 
-    enum AuthMethod
-    {
-        AuthPlain,
-        AuthLogin
+    class SmtpError {
+    public:
+        SmtpError(SmtpErrorType type, qint32 code = -1, QString message = QString()) :
+            type(type), code(code), message(message) {}
+
+        SmtpErrorType type = SmtpErrorType::NoError;
+        qint32 code = -1;
+        QString message;
     };
 
-    enum SmtpError
-    {
-        ConnectionTimeoutError,
-        ResponseTimeoutError,
-        SendDataTimeoutError,
-        AuthenticationFailedError,
-        ServerError,    // 4xx smtp error
-        ClientError     // 5xx smtp error
+    enum class ConnectionType {
+        Tcp,
+        Ssl,
+        Tls,
     };
+    Q_ENUM(ConnectionType)
 
-    enum ConnectionType
-    {
-        TcpConnection,
-        SslConnection,
-        TlsConnection       // STARTTLS
-    };
-
-    /* [0] --- */
-
-
-    /* [1] Constructors and Destructors */
-
-    SmtpClient(const QString & host = "localhost", int port = 25, ConnectionType ct = TcpConnection);
+    SmtpClient(const QString & host = "localhost", int port = 25, ConnectionType ct = ConnectionType::Ssl);
 
     ~SmtpClient();
 
-    /* [1] --- */
-
-
-    /* [2] Getters and Setters */
-
-    const QString& getHost() const;
+    const QString& host() const;
     void setHost(const QString &host);
 
-    int getPort() const;
+    int port() const;
     void setPort(int port);
 
-    const QString& getName() const;
-    void setName(const QString &name);
+    const QString& serverName() const;
+    void setServerName(const QString &name);
 
-    ConnectionType getConnectionType() const;
+    ConnectionType connectionType() const;
     void setConnectionType(ConnectionType ct);
 
-    const QString & getUser() const;
+    const QString & user() const;
     void setUser(const QString &user);
 
-    const QString & getPassword() const;
+    const QString & password() const;
     void setPassword(const QString &password);
 
-    SmtpClient::AuthMethod getAuthMethod() const;
+    SmtpClient::AuthMethod authMethod() const;
     void setAuthMethod(AuthMethod method);
 
-    const QString & getResponseText() const;
-    int getResponseCode() const;
+    const QString & responseText() const;
+    int responseCode() const;
 
-    int getConnectionTimeout() const;
+    int connectionTimeout() const;
     void setConnectionTimeout(int msec);
 
-    int getResponseTimeout() const;
+    int responseTimeout() const;
     void setResponseTimeout(int msec);
     
-    int getSendMessageTimeout() const;
+    int sendMessageTimeout() const;
     void setSendMessageTimeout(int msec);
 
-    QTcpSocket* getSocket();
-
-
-    /* [2] --- */
-
-
-    /* [3] Public methods */
+    QTcpSocket* socket();
 
     bool connectToHost();
 
     bool login();
-    bool login(const QString &user, const QString &password, AuthMethod method = AuthLogin);
+    bool login(const QString &user, const QString &password, AuthMethod method = AuthMethod::Login);
 
     bool sendMail(MimeMessage& email);
 
@@ -125,67 +129,20 @@ public:
 protected slots:
     void ignoreSslErrors(const QList<QSslError> & errors);
 
-    /* [3] --- */
-
 protected:
+    bool waitForResponse(qint32 a_expectedCode, SmtpClient::SmtpErrorType a_onErrorType);
 
-    /* [4] Protected members */
-
-    QTcpSocket *socket;
-
-    QString host;
-    int port;
-    ConnectionType connectionType;
-    QString name;
-
-    QString user;
-    QString password;
-    AuthMethod authMethod;
-
-    int connectionTimeout;
-    int responseTimeout;
-    int sendMessageTimeout;
-    
-    
-    QString responseText;
-    int responseCode;
-
-
-    class ResponseTimeoutException {};
-    class SendMessageTimeoutException {};
-
-    /* [4] --- */
-
-
-    /* [5] Protected methods */
-
-    void waitForResponse();
-
-    void sendMessage(const QString &text);
-    void sendMessage(const char* text);
-    void sendMessage(const QByteArray &text);
-
-    /* [5] --- */
+    bool sendMessage(const QString &text);
+    bool sendMessage(const char* text);
+    bool sendMessage(const QByteArray &text);
 
 protected slots:
-
-    /* [6] Protected slots */
-
     void socketStateChanged(QAbstractSocket::SocketState state);
     void socketError(QAbstractSocket::SocketError error);
     void socketReadyRead();
 
-    /* [6] --- */
-
-
 signals:
-
-    /* [7] Signals */
-
     void smtpError(SmtpClient::SmtpError e);
-
-    /* [7] --- */
-
 };
 
 #endif // SMTPCLIENT_H

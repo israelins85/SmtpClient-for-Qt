@@ -31,18 +31,19 @@ class SMTP_EXPORT MimeMessage : public QObject
 {
 public:
 
-    enum RecipientType {
+    enum class RecipientType {
         To,                 // primary
         Cc,                 // carbon copy
         Bcc                 // blind carbon copy
     };
+    Q_ENUM(RecipientType)
 
     MimeMessage();
     ~MimeMessage();
 
     void setSender(const EmailAddress& e);
     void setReplyTo(const EmailAddress& rto);
-    void addRecipient(const EmailAddress& rcpt, RecipientType type = To);
+    void addRecipient(const EmailAddress& rcpt, RecipientType type = RecipientType::To);
     void addTo(const EmailAddress& rcpt);
     void addCc(const EmailAddress& rcpt);
     void addBcc(const EmailAddress& rcpt);
@@ -53,24 +54,24 @@ public:
 
     void setHeaderEncoding(MimePart::Encoding);
 
-    const EmailAddress & getSender() const;
-    const QList<EmailAddress> & getRecipients(RecipientType type = To) const;
-    const QString & getSubject() const;
-    const QList<MimePart*> & getParts() const;
-    const EmailAddress& getReplyTo() const;
+    const EmailAddress & sender() const;
+    const QList<EmailAddress> & recipients(RecipientType type = RecipientType::To) const;
+    const QString & subject() const;
+    const QList<MimePart*> & parts() const;
+    const EmailAddress& replyTo() const;
 
-    MimeMultiPart& getContent();
+    MimeMultiPart& content();
 
     bool write(QIODevice* device, qint32 timeout);
 
 protected:
-    EmailAddress sender;
-    EmailAddress replyTo;
-    QString mInReplyTo;
-    QList<EmailAddress> recipientsTo, recipientsCc, recipientsBcc;
-    QString subject;
-    MimeMultiPart content;
-    MimePart::Encoding hEncoding;
+    EmailAddress m_sender;
+    EmailAddress m_replyTo;
+    QString m_mInReplyTo;
+    QList<EmailAddress> m_recipientsTo, m_recipientsCc, m_recipientsBcc;
+    QString m_subject;
+    MimeMultiPart m_content;
+    MimePart::Encoding m_hEncoding;
 };
 
 #endif // MIMEMESSAGE_H

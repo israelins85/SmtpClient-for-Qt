@@ -23,45 +23,34 @@
 EmailAddress::EmailAddress()
 {}
 
-EmailAddress::EmailAddress(const QString & address, const QString & name)
+EmailAddress::EmailAddress(const char* a_address)
 {
-    this->address = address;
-    this->name = name;
+    address = a_address;
+}
+
+EmailAddress::EmailAddress(const QString & a_address)
+{
+    address = a_address;
+}
+
+EmailAddress::EmailAddress(const QString& a_address, const QString& a_name)
+{
+    address = a_address;
+    name = a_name;
 }
 
 EmailAddress::~EmailAddress()
+{}
+
+bool EmailAddress::isEmpty() const
 {
-}
-
-/* [1] --- */
-
-
-/* [2] Getters and Setters */
-
-void EmailAddress::setName(const QString & name)
-{
-    this->name = name;
-
-}
-
-void EmailAddress::setAddress(const QString & address)
-{
-    this->address = address;
-}
-
-const QString & EmailAddress::getName() const
-{
-    return name;
-}
-
-const QString & EmailAddress::getAddress() const
-{
-    return address;
+    return address.isEmpty();
 }
 
 QByteArray EmailAddress::encoded(MimePart::Encoding a_encode) const
 {
     QByteArray l_encoded;
+
     if (!name.isEmpty()) {
         l_encoded += MimePart::encodeString(name, a_encode);
     }
@@ -69,6 +58,3 @@ QByteArray EmailAddress::encoded(MimePart::Encoding a_encode) const
 
     return l_encoded;
 }
-
-/* [2] --- */
-
