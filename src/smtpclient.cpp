@@ -457,7 +457,6 @@ bool SmtpClient::sendMail(MimeMessage& email)
 
     // Send \r\n.\r\n to end the mail data
     sendMessage(".");
-
     if (!waitForResponse(250, SmtpErrorType::Server)) return false;
 
     return true;
@@ -503,7 +502,7 @@ bool SmtpClient::waitForResponse(qint32 a_expectedCode, SmtpErrorType a_onErrorT
         return false;
     }
 
-    if (!socket->waitForBytesWritten(500)) {
+    if (!socket->waitForReadyRead(500)) {
         QEventLoop l_evLoop;
         QTimer l_timer;
 
