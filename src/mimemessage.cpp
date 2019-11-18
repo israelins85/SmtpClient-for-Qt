@@ -220,7 +220,7 @@ bool MimeMessage::write(QIODevice* device, qint32 timeout)
 
     /* ------------ Subject ------------- */
     mime += "Subject: ";
-    mime += MimePart::encodeString(m_subject, m_hEncoding);
+    mime += MimePart::encodeString(m_subject, MimePart::Encoding::Base64);
     mime += "\r\n";
     /* ---------------------------------- */
 
